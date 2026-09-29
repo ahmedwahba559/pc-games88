@@ -41,6 +41,9 @@ button{cursor:pointer;border:0}
 .pay-card h4{color:#fff;margin-bottom:5px}
 .pay-card p{color:#8492a7;font-size:12px}
 
+.instapay-box{background:#0d1f33;border:1px dashed #00bcd4;padding:15px;border-radius:8px;margin-top:10px;text-align:center}
+.instapay-num{font-size:18px;font-weight:bold;color:#00d9ff;letter-spacing:1px;margin:8px 0}
+
 footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40;margin-top:30px}
 .modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.show{display:flex}
 .box{background:#111a29;width:min(700px,100%);max-height:90vh;overflow:auto;border:1px solid #34445d;border-radius:14px;padding:25px;position:relative}
@@ -58,7 +61,10 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 <header>
 <div class="nav">
 <div class="logo">🎮 Games <span>Hub</span></div>
-<nav><a href="#games">الألعاب</a><a href="#payment-methods">طرق الدفع</a></nav>
+<nav>
+  <a href="#games">الألعاب</a>
+  <a href="#payment-methods">طرق الدفع</a>
+</nav>
 <div id="userBar" class="userbar"></div>
 </div>
 </header>
@@ -94,6 +100,10 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   <h2>💳 طرق الدفع المدعومة للألعاب المدفوعة</h2>
   <div class="pay-grid">
     <div class="pay-card">
+      <h4>⚡ انستا باي (InstaPay)</h4>
+      <p>عبر معرف InstaPay الرسمي</p>
+    </div>
+    <div class="pay-card">
       <h4>💳 البطاقات البنكية</h4>
       <p>Visa / MasterCard</p>
     </div>
@@ -101,43 +111,60 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
       <h4>📱 المحافظ الإلكترونية</h4>
       <p>Vodafone Cash / Orange / Etisalat</p>
     </div>
-    <div class="pay-card">
-      <h4>🌐 بايبال</h4>
-      <p>PayPal Secure Checkout</p>
-    </div>
-    <div class="pay-card">
-      <h4>🎁 بطاقات الهدايا</h4>
-      <p>Steam / Google Play / App Store</p>
-    </div>
   </div>
 </section>
 </main>
 
 <footer>© 2026 <b style="color:#00d9ff">Games Hub</b> — جميع الحقوق محفوظة</footer>
 
-<!-- Auth -->
+<!-- Auth Modal -->
 <div id="authModal" class="modal">
 <div class="box">
 <span class="close" onclick="closeModal('authModal')">×</span>
 <div class="tabs"><button id="loginTab" class="active" onclick="showAuth('login')">تسجيل الدخول</button><button id="signupTab" onclick="showAuth('signup')">إنشاء حساب</button></div>
+
 <div id="loginForm">
 <h2>تسجيل الدخول</h2>
 <input id="loginEmail" type="email" placeholder="البريد الإلكتروني">
 <input id="loginPass" type="password" placeholder="كلمة المرور">
 <button class="btn" style="width:100%" onclick="login()">دخول</button>
 </div>
+
 <div id="signupForm" class="hidden">
-<h2>إنشاء حساب</h2>
-<input id="signupName" placeholder="الاسم">
+<h2>إنشاء حساب جديد</h2>
+<input id="signupName" placeholder="الاسم الكامل">
+<input id="signupPhone" type="tel" placeholder="رقم الهاتف (مثال: 01012345678)">
 <input id="signupEmail" type="email" placeholder="البريد الإلكتروني">
 <input id="signupPass" type="password" placeholder="كلمة المرور">
-<button class="btn" style="width:100%" onclick="signup()">إنشاء الحساب</button>
+<button class="btn" style="width:100%" onclick="sendOTP()">إرسال كود التحقيق 📩</button>
 </div>
+
+<!-- نموذج إدخال كود التحقيق الـ OTP -->
+<div id="otpForm" class="hidden">
+<h2>تأكيد البريد الإلكتروني</h2>
+<p style="font-size:13px;color:#00d9ff;margin-bottom:10px">تم إرسال كود التحقيق المكون من 4 أرقام إلى بريدك الإلكتروني.</p>
+<input id="otpInput" type="text" maxlength="4" placeholder="أدخل كود التحقيق (OTP)">
+<button class="btn success" style="width:100%" onclick="verifyOTP()">تأكيد وإنشاء الحساب</button>
+</div>
+
 <p id="authMsg" style="margin-top:10px;color:#ff5252"></p>
 </div>
 </div>
 
-<!-- Details -->
+<!-- Settings Modal (إعدادات الحساب) -->
+<div id="settingsModal" class="modal">
+<div class="box">
+  <span class="close" onclick="closeModal('settingsModal')">×</span>
+  <h2>⚙️ إعدادات الحساب</h2>
+  <label>تعديل الاسم:</label>
+  <input id="setProfileName" placeholder="الاسم الجديد">
+  <label>تعديل رقم الهاتف:</label>
+  <input id="setProfilePhone" placeholder="رقم الهاتف الجديد">
+  <button class="btn success" style="width:100%;margin-top:10px" onclick="saveProfileSettings()">حفظ التعديلات</button>
+</div>
+</div>
+
+<!-- Details Modal -->
 <div id="detailsModal" class="modal">
 <div class="box"><span class="close" onclick="closeModal('detailsModal')">×</span><div id="details"></div></div>
 </div>
@@ -151,38 +178,39 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   
   <label>اختر طريقة الدفع:</label>
   <select id="paySelect" onchange="togglePaymentFields()">
+    <option value="instapay">⚡ InstaPay (انستا باي)</option>
     <option value="card">بطاقة بنكية (Visa / MasterCard)</option>
     <option value="wallet">محفظة إلكترونية (Vodafone Cash)</option>
-    <option value="paypal">PayPal</option>
-    <option value="giftcard">بطاقة هدايا / كارت شحن</option>
   </select>
 
-  <!-- حقول إدخال البطاقة البنكية -->
-  <div id="cardFields" style="margin-top: 15px;">
-    <input id="cardNumber" type="text" maxlength="19" placeholder="رقم البطاقة (16 رقم)" oninput="formatCardNumber(this)">
-    <div style="display: flex; gap: 10px;">
-      <input id="cardExpiry" type="text" maxlength="5" placeholder="تاريخ الانتهاء (MM/YY)" style="flex: 1;">
-      <input id="cardCvc" type="password" maxlength="4" placeholder="رمز CVC/CVV" style="flex: 1;">
+  <div id="instapayFields" style="margin-top: 15px;">
+    <div class="instapay-box">
+      <p style="font-size:14px;color:#cfdceb">قم بتحويل المبلغ عبر InstaPay إلى معرف الحساب التالي:</p>
+      <div class="instapay-num">gameshub@instapay</div>
     </div>
-    <input id="cardHolder" type="text" placeholder="اسم صاحب البطاقة">
+    <input id="instaSender" type="text" placeholder="اسمك أو رقم المعاملة للتحقق من التحويل">
   </div>
 
-  <!-- حقل المحافظ الإلكترونية -->
+  <div id="cardFields" class="hidden" style="margin-top: 15px;">
+    <input id="cardNumber" type="text" maxlength="19" placeholder="رقم البطاقة (16 رقم)">
+  </div>
+
   <div id="walletFields" class="hidden" style="margin-top: 15px;">
-    <input id="walletNumber" type="text" placeholder="رقم المحفظة (مثال: 01012345678)">
+    <input id="walletNumber" type="text" placeholder="رقم المحفظة المستخدم للتحويل">
   </div>
 
   <button class="btn success" style="width:100%;margin-top:15px" onclick="confirmPay()">تأكيد وتفعيل العملية</button>
 </div>
 </div>
 
-<!-- Admin -->
+<!-- Admin Panel -->
 <div id="adminModal" class="modal">
 <div class="box">
 <span class="close" onclick="closeModal('adminModal')">×</span>
 <h2>🛠️ لوحة تحكم المسؤول</h2>
-<div class="notice">الحساب المسؤول: <b>aw334948@gmail.com</b> أو <b>oeid66707@gmail.com</b></div>
+<div class="notice">البريد المعتمد لاستلام الإشعارات: <b>aw334948@gmail.com</b></div>
 
+<h3>➕ إضافة لعبة جديدة:</h3>
 <label>اسم اللعبة:</label>
 <input id="gName" placeholder="اسم اللعبة">
 
@@ -206,8 +234,8 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   <option value="preorder">طلب مسبق (Pre-Order)</option>
 </select>
 
-<label>السعر (اكتب: مجاني أو 0 أو السعر بالدولار):</label>
-<input id="gPrice" placeholder="مثال: مجاني أو 0 أو $29.99">
+<label>السعر (اكتب: مجاني أو 0 أو السعر بالجنيه/الدولار):</label>
+<input id="gPrice" placeholder="مثال: مجاني أو 0 أو 150 ج.م">
 
 <label>رابط التحميل / الصفحة الرسمية:</label>
 <input id="gDownload" placeholder="رابط التحميل الرسمى">
@@ -219,7 +247,17 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 <label>وصف اللعبة:</label>
 <textarea id="gDesc" placeholder="وصف اللعبة"></textarea>
 
-<button class="btn" style="width:100%;margin-bottom:15px" onclick="addGame()">➕ إضافة لعبة</button>
+<button class="btn" style="width:100%;margin-bottom:20px" onclick="addGame()">➕ إضافة اللعبة</button>
+
+<hr style="border:0;border-top:1px solid #27364d;margin:20px 0">
+
+<h3>👥 قائمة جميع الحسابات المسجلة:</h3>
+<div id="registeredUsers" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px"></div>
+
+<h3>🛒 سجل عمليات الشراء:</h3>
+<div id="purchaseHistory" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px"></div>
+
+<h3>🎮 الألعاب الحالية:</h3>
 <div id="adminGames"></div>
 </div>
 </div>
@@ -228,23 +266,28 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 const ADMIN_EMAILS=["aw334948@gmail.com","oeid66707@gmail.com"];
 
 const defaultGames=[
-  // PC Games
-  {name:"GTA VI",platform:"pc",category:"action",type:"preorder",price:"$69.99",download:"https://store.rockstargames.com/",size:"150 GB",rating:5.0,desc:"طلب مسبق لأقوى لعبة عالم مفتوح قادمة."},
-  {name:"Minecraft",platform:"pc",category:"adventure",type:"normal",price:"$29.99",download:"https://www.minecraft.net/",size:"2 GB",rating:4.8,desc:"لعبة بناء واستكشاف عالم مفتوح للكمبيوتر."},
-  {name:"Forza Horizon",platform:"pc",category:"racing",type:"normal",price:"0",download:"https://www.xbox.com/",size:"110 GB",rating:4.7,desc:"لعبة سباقات وعالم مفتوح للسيارات."},
-
-  // Mobile Games
+  {name:"GTA VI",platform:"pc",category:"action",type:"preorder",price:"300 ج.م",download:"https://store.rockstargames.com/",size:"150 GB",rating:5.0,desc:"طلب مسبق لأقوى لعبة عالم مفتوح قادمة."},
+  {name:"Minecraft",platform:"pc",category:"adventure",type:"normal",price:"150 ج.م",download:"https://www.minecraft.net/",size:"2 GB",rating:4.8,desc:"لعبة بناء واستكشاف عالم مفتوح للكمبيوتر."},
   {name:"PUBG Mobile",platform:"mobile",category:"action",type:"normal",price:"مجاني",download:"https://www.pubgmobile.com/",size:"2.5 GB",rating:4.6,desc:"لعبة باتل رويال الشهيرة للهواتف الذكية."},
   {name:"Project Mugen",platform:"mobile",category:"adventure",type:"preorder",price:"0",download:"https://genshin.hoyoverse.com/",size:"غير محدد",rating:4.9,desc:"تسجيل طلب مسبق مجاني للعبة المستقبلية."}
 ];
 
 let games=JSON.parse(localStorage.getItem("allgames")||"null")||defaultGames;
 let users=JSON.parse(localStorage.getItem("pcusers")||"[]");
+let purchases=JSON.parse(localStorage.getItem("purchases")||"[]");
 let currentUser=JSON.parse(localStorage.getItem("pcuser")||"null");
 let currentPlatform="pc";
 let category="all";
 
-function save(){localStorage.setItem("allgames",JSON.stringify(games));localStorage.setItem("pcusers",JSON.stringify(users));}
+let generatedOTP = null;
+let tempUserData = null;
+
+function save(){
+  localStorage.setItem("allgames",JSON.stringify(games));
+  localStorage.setItem("pcusers",JSON.stringify(users));
+  localStorage.setItem("purchases",JSON.stringify(purchases));
+}
+
 function catName(c){return {action:"أكشن",racing:"سباق",adventure:"مغامرات",sports:"رياضة"}[c]||c}
 
 function setPlatform(p){
@@ -315,7 +358,6 @@ function handleAction(i) {
       }
     }
   } else {
-    // اللعبة مدفوعة -> ظهور نافذة الدفع سواء كانت Pre-Order أو شراء عادي
     openPay(i);
   }
 }
@@ -326,15 +368,51 @@ function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&l
 function openModal(id){document.getElementById(id).classList.add("show")}
 function closeModal(id){document.getElementById(id).classList.remove("show")}
 
-function showAuth(type){document.getElementById("loginForm").classList.toggle("hidden",type!=="login");document.getElementById("signupForm").classList.toggle("hidden",type!=="signup");document.getElementById("loginTab").classList.toggle("active",type==="login");document.getElementById("signupTab").classList.toggle("active",type==="signup");document.getElementById("authMsg").textContent=""}
+function showAuth(type){
+  document.getElementById("loginForm").classList.toggle("hidden",type!=="login");
+  document.getElementById("signupForm").classList.toggle("hidden",type!=="signup");
+  document.getElementById("otpForm").classList.add("hidden");
+  document.getElementById("loginTab").classList.toggle("active",type==="login");
+  document.getElementById("signupTab").classList.toggle("active",type==="signup");
+  document.getElementById("authMsg").textContent="";
+}
 function authMessage(t){document.getElementById("authMsg").textContent=t}
 
-function signup(){
-  const name=document.getElementById("signupName").value.trim(),email=document.getElementById("signupEmail").value.trim().toLowerCase(),pass=document.getElementById("signupPass").value;
-  if(!name||!email||!pass)return authMessage("املأ كل البيانات.");
-  if(pass.length<6)return authMessage("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
-  if(users.some(u=>u.email===email))return authMessage("هذا البريد مسجل بالفعل.");
-  users.push({name,email,pass});save();authMessage("تم إنشاء الحساب. يمكنك تسجيل الدخول الآن.");showAuth("login");document.getElementById("loginEmail").value=email;
+function sendOTP(){
+  const name=document.getElementById("signupName").value.trim();
+  const phone=document.getElementById("signupPhone").value.trim();
+  const email=document.getElementById("signupEmail").value.trim().toLowerCase();
+  const pass=document.getElementById("signupPass").value;
+
+  if(!name||!phone||!email||!pass) return authMessage("يرجى ملء جميع البيانات.");
+  if(users.some(u=>u.email===email)) return authMessage("هذا البريد الإلكتروني مسجل بالفعل.");
+
+  generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+  tempUserData = {name, phone, email, pass, date: new Date().toLocaleString()};
+
+  document.getElementById("signupForm").classList.add("hidden");
+  document.getElementById("otpForm").classList.remove("hidden");
+
+  alert(`[كود التحقيق التجريبي]\nتم إرسال كود التحقيق إلى بريدك (${email}):\nالكود هو: ${generatedOTP}`);
+}
+
+function verifyOTP(){
+  const inputOTP = document.getElementById("otpInput").value.trim();
+  if(!inputOTP || inputOTP !== generatedOTP) {
+    return alert("كود التحقيق غير صحيح! حاول مرة أخرى.");
+  }
+
+  users.push(tempUserData);
+  save();
+
+  sendNotificationToAdmin("حساب جديد مسجل ومؤكد", `الاسم: ${tempUserData.name}\nالهاتف: ${tempUserData.phone}\nالبريد: ${tempUserData.email}`);
+
+  alert("تم تأكيد البريد الإلكتروني وإنشاء حسابك بنجاح!");
+  closeModal('authModal');
+  
+  currentUser = {name: tempUserData.name, email: tempUserData.email, phone: tempUserData.phone, admin: false};
+  localStorage.setItem("pcuser", JSON.stringify(currentUser));
+  updateUserBar();
 }
 
 function login(){
@@ -347,16 +425,54 @@ function login(){
   }else{
     const u=users.find(x=>x.email===email&&x.pass===pass);
     if(!u)return authMessage("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
-    currentUser={name:u.name,email:u.email,admin:false};
+    currentUser={name:u.name,email:u.email,phone:u.phone||"غير محدد",admin:false};
   }
   localStorage.setItem("pcuser",JSON.stringify(currentUser));closeModal("authModal");updateUserBar();
 }
 
 function logout(){currentUser=null;localStorage.removeItem("pcuser");updateUserBar();closeModal("adminModal")}
+
 function updateUserBar(){
   const bar=document.getElementById("userBar");
-  if(!currentUser){bar.innerHTML='<button class="btn" onclick="showAuth(\'login\');openModal(\'authModal\')">تسجيل الدخول</button>';return}
-  bar.innerHTML=`<span>👤 ${esc(currentUser.name)}</span>${currentUser.admin?'<span class="admin">ADMIN</span><button class="btn" onclick="openAdmin()">لوحة التحكم</button>':''}<button class="btn secondary" onclick="logout()">خروج</button>`;
+  if(!currentUser){
+    bar.innerHTML='<button class="btn" onclick="showAuth(\'login\');openModal(\'authModal\')">تسجيل الدخول</button>';
+    return;
+  }
+  bar.innerHTML=`
+    <span>👤 ${esc(currentUser.name)}</span>
+    <button class="btn success" onclick="openProfileSettings()">⚙️️ إعدادات الحساب</button>
+    ${currentUser.admin?'<span class="admin">ADMIN</span><button class="btn" onclick="openAdmin()">لوحة التحكم</button>':''}
+    <button class="btn danger" onclick="logout()">خروج</button>
+  `;
+}
+
+function openProfileSettings(){
+  if(!currentUser) return openModal("authModal");
+  document.getElementById("setProfileName").value = currentUser.name || "";
+  document.getElementById("setProfilePhone").value = currentUser.phone || "";
+  openModal("settingsModal");
+}
+
+function saveProfileSettings(){
+  const newName = document.getElementById("setProfileName").value.trim();
+  const newPhone = document.getElementById("setProfilePhone").value.trim();
+
+  if(!newName || !newPhone) return alert("يرجى عدم ترك الحقول فارغة.");
+
+  const userObj = users.find(u => u.email === currentUser.email);
+  if(userObj) {
+    userObj.name = newName;
+    userObj.phone = newPhone;
+  }
+
+  currentUser.name = newName;
+  currentUser.phone = newPhone;
+
+  save();
+  localStorage.setItem("pcuser", JSON.stringify(currentUser));
+  updateUserBar();
+  closeModal("settingsModal");
+  alert("تم تعديل الاسم ورقم الهاتف بنجاح!");
 }
 
 function details(i){
@@ -364,7 +480,7 @@ function details(i){
   const isFree = checkIfFree(g.price);
   const isPreOrder = g.type === "preorder";
 
-  let btnText = isPreOrder ? (isFree ? "حجز مسبق مجاني" : "طلب مسبق (Pre-Order)") : (isFree ? "⬇️ تحميل مجاني" : "🛒 إتمام الشراء");
+  let btnText = isPreOrder ? (isFree ? "حجز مسبق مجاني" : "طلب مسبق (Pre-Order)") : (isFree ? "⬇ تحميل مجاني" : "🛒 إتمام الشراء");
 
   document.getElementById("details").innerHTML=`
     <h2>${esc(g.name)} (${g.platform.toUpperCase()})</h2>
@@ -379,54 +495,53 @@ function openPay(i){
   activePayGame=games[i];
   const isPreOrder = activePayGame.type === "preorder";
   document.getElementById("payModalTitle").textContent = isPreOrder ? "🛍️ إتمام الطلب المسبق (Pre-Order)" : "🛒 إتمام عملية الشراء";
-  document.getElementById("payInfo").innerHTML=`<p>اللعبة: <b>${esc(activePayGame.name)}</b></p><p>السعر: <b>${esc(activePayGame.price||"مجاني")}</b></p>`;
+  document.getElementById("payInfo").innerHTML=`<p>اللعبة: <b>${esc(activePayGame.name)}</b></p><p>السعر المطلوب: <b>${esc(activePayGame.price||"مجاني")}</b></p>`;
   togglePaymentFields();
   openModal("payModal");
 }
 
 function togglePaymentFields() {
   const method = document.getElementById("paySelect").value;
+  document.getElementById("instapayFields").classList.toggle("hidden", method !== "instapay");
   document.getElementById("cardFields").classList.toggle("hidden", method !== "card");
   document.getElementById("walletFields").classList.toggle("hidden", method !== "wallet");
 }
 
-function formatCardNumber(input) {
-  let value = input.value.replace(/\D/g, '');
-  value = value.replace(/(.{4})/g, '$1 ').trim();
-  input.value = value;
-}
-
 function confirmPay(){
   if (!activePayGame) return;
-  const method = document.getElementById("paySelect").value;
 
-  if (method === "card") {
-    const cardNum = document.getElementById("cardNumber").value.replace(/\s/g, '');
-    const expiry = document.getElementById("cardExpiry").value.trim();
-    const cvc = document.getElementById("cardCvc").value.trim();
-    const holder = document.getElementById("cardHolder").value.trim();
+  const purchaseRecord = {
+    user: currentUser ? currentUser.email : "زائر غير مسجل",
+    game: activePayGame.name,
+    price: activePayGame.price,
+    date: new Date().toLocaleString()
+  };
 
-    if (cardNum.length < 16) return alert("يرجى إدخال رقم بطاقة صحيح مكون من 16 رقمًا.");
-    if (!expiry || !cvc || !holder) return alert("يرجى ملء جميع بيانات البطاقة البنكية.");
-  } else if (method === "wallet") {
-    const walletNum = document.getElementById("walletNumber").value.trim();
-    if (walletNum.length < 11) return alert("يرجى إدخال رقم محفظة إلكترونية صحيح.");
-  }
+  purchases.push(purchaseRecord);
+  save();
 
-  const isPreOrder = activePayGame.type === "preorder";
-  if (isPreOrder) {
-    alert(`تمت عملية دفع الطلب المسبق بنجاح للعبة: ${activePayGame.name}!\nسيتم تفعيل اللعبة لحسابك فور صدورها.`);
-  } else {
-    alert(`تمت عملية الدفع بنجاح للعبة: ${activePayGame.name}!\nجاري توجيهك لرابط التحميل الرسمي.`);
-    if (activePayGame.download) window.open(activePayGame.download, "_blank");
-  }
+  sendNotificationToAdmin("عملية شراء جديدة!", `تم شراء اللعبة: ${activePayGame.name}\nالسعر: ${activePayGame.price}\nبواسطة: ${purchaseRecord.user}`);
 
+  alert(`تم تسجيل العملية بنجاح للعبة: ${activePayGame.name}\nوإرسال البيانات إلى aw334948@gmail.com`);
   closeModal("payModal");
+  if (activePayGame.download) window.open(activePayGame.download, "_blank");
+}
+
+function sendNotificationToAdmin(subject, text) {
+  console.log(`[إشعار للمسؤول aw334948@gmail.com]\nالموضوع: ${subject}\nبيانات العملية:\n${text}`);
 }
 
 function openAdmin(){
-  if(!currentUser?.admin){showAuth("login");openModal("authModal");return}
-  renderAdmin();openModal("adminModal");
+  if(!currentUser?.admin) return;
+
+  const uBox = document.getElementById("registeredUsers");
+  uBox.innerHTML = users.length ? users.map(u=>`<div>👤 <b>${esc(u.name)}</b> (${esc(u.email)}) - 📞 ${esc(u.phone||"غير محدد")}</div>`).join('') : "لا يوجد مستخدمين مسجلين بعد.";
+
+  const pBox = document.getElementById("purchaseHistory");
+  pBox.innerHTML = purchases.length ? purchases.map(p=>`<div>🛍️ <b>${esc(p.game)}</b> - ${esc(p.price)} | العميل: ${esc(p.user)} | ${p.date}</div>`).join('') : "لا توجد مشتريات مسجلة بعد.";
+
+  renderAdmin();
+  openModal("adminModal");
 }
 
 function addGame(){
@@ -441,7 +556,7 @@ function addGame(){
         desc=document.getElementById("gDesc").value.trim();
 
   if(!name)return alert("يرجى كتابة اسم اللعبة على الأقل.");
-  
+
   games.push({
     name,
     platform,
@@ -457,7 +572,7 @@ function addGame(){
   save();
   render();
   renderAdmin();
-  alert("تمت إضافة اللعبة وتعيين خياراتها بنجاح.");
+  alert("تمت إضافة اللعبة وتعيين السعر والإتاحة بنجاح.");
 }
 
 function renderAdmin(){
