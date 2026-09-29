@@ -142,7 +142,7 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 <!-- نموذج إدخال كود التحقيق الـ OTP -->
 <div id="otpForm" class="hidden">
 <h2>تأكيد البريد الإلكتروني</h2>
-<p style="font-size:13px;color:#00d9ff;margin-bottom:10px">تم إرسال كود التحقيق المكون من 4 أرقام إلى بريدك الإلكتروني.</p>
+<p style="font-size:13px;color:#00d9ff;margin-bottom:10px">تم توليد كود التحقيق المكون من 4 أرقام لتأكيد حسابك.</p>
 <input id="otpInput" type="text" maxlength="4" placeholder="أدخل كود التحقيق (OTP)">
 <button class="btn success" style="width:100%" onclick="verifyOTP()">تأكيد وإنشاء الحساب</button>
 </div>
@@ -263,21 +263,22 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 </div>
 
 <script>
-const ADMIN_EMAILS=["aw334948@gmail.com","oeid66707@gmail.com"];
+const FORMSPREE_URL = "https://formspree.io/f/mjyklodg";
+const ADMIN_EMAILS = ["aw334948@gmail.com", "oeid66707@gmail.com"];
 
-const defaultGames=[
+const defaultGames = [
   {name:"GTA VI",platform:"pc",category:"action",type:"preorder",price:"300 ج.م",download:"https://store.rockstargames.com/",size:"150 GB",rating:5.0,desc:"طلب مسبق لأقوى لعبة عالم مفتوح قادمة."},
   {name:"Minecraft",platform:"pc",category:"adventure",type:"normal",price:"150 ج.م",download:"https://www.minecraft.net/",size:"2 GB",rating:4.8,desc:"لعبة بناء واستكشاف عالم مفتوح للكمبيوتر."},
   {name:"PUBG Mobile",platform:"mobile",category:"action",type:"normal",price:"مجاني",download:"https://www.pubgmobile.com/",size:"2.5 GB",rating:4.6,desc:"لعبة باتل رويال الشهيرة للهواتف الذكية."},
   {name:"Project Mugen",platform:"mobile",category:"adventure",type:"preorder",price:"0",download:"https://genshin.hoyoverse.com/",size:"غير محدد",rating:4.9,desc:"تسجيل طلب مسبق مجاني للعبة المستقبلية."}
 ];
 
-let games=JSON.parse(localStorage.getItem("allgames")||"null")||defaultGames;
-let users=JSON.parse(localStorage.getItem("pcusers")||"[]");
-let purchases=JSON.parse(localStorage.getItem("purchases")||"[]");
-let currentUser=JSON.parse(localStorage.getItem("pcuser")||"null");
-let currentPlatform="pc";
-let category="all";
+let games = JSON.parse(localStorage.getItem("allgames")||"null")||defaultGames;
+let users = JSON.parse(localStorage.getItem("pcusers")||"[]");
+let purchases = JSON.parse(localStorage.getItem("purchases")||"[]");
+let currentUser = JSON.parse(localStorage.getItem("pcuser")||"null");
+let currentPlatform = "pc";
+let category = "all";
 
 let generatedOTP = null;
 let tempUserData = null;
@@ -286,6 +287,19 @@ function save(){
   localStorage.setItem("allgames",JSON.stringify(games));
   localStorage.setItem("pcusers",JSON.stringify(users));
   localStorage.setItem("purchases",JSON.stringify(purchases));
+}
+
+function sendNotificationToAdmin(subject, text) {
+  fetch(FORMSPREE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      _subject: subject,
+      message: text
+    })
+  })
+  .then(res => console.log("تم الإرسال لـ Formspree بنجاح"))
+  .catch(err => console.error("خطأ بالإرسال:", err));
 }
 
 function catName(c){return {action:"أكشن",racing:"سباق",adventure:"مغامرات",sports:"رياضة"}[c]||c}
@@ -350,6 +364,7 @@ function handleAction(i) {
   if (isFree) {
     if (isPreOrder) {
       alert(`تم تسجيل طلبك المسبق بنجاح للعبة: ${g.name}!\nسنقوم بإخطارك فور صدورها.`);
+      sendNotificationToAdmin("طلب مسبق مجاني جديد", `اللعبة: ${g.name}\nالمستخدم: ${currentUser ? currentUser.email : 'زائر'}`);
     } else {
       if (g.download) {
         window.open(g.download, "_blank");
@@ -385,7 +400,6 @@ function sendOTP(){
   const pass=document.getElementById("signupPass").value;
 
   if(!name||!phone||!email||!pass) return authMessage("يرجى ملء جميع البيانات.");
-  if(users.some(u=>u.email===email)) return authMessage("هذا البريد الإلكتروني مسجل بالفعل.");
 
   generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
   tempUserData = {name, phone, email, pass, date: new Date().toLocaleString()};
@@ -393,7 +407,7 @@ function sendOTP(){
   document.getElementById("signupForm").classList.add("hidden");
   document.getElementById("otpForm").classList.remove("hidden");
 
-  alert(`[كود التحقيق التجريبي]\nتم إرسال كود التحقيق إلى بريدك (${email}):\nالكود هو: ${generatedOTP}`);
+  alert(`كود التحقيق الخاص بك لتأكيد الحساب هو: ${generatedOTP}`);
 }
 
 function verifyOTP(){
@@ -405,9 +419,9 @@ function verifyOTP(){
   users.push(tempUserData);
   save();
 
-  sendNotificationToAdmin("حساب جديد مسجل ومؤكد", `الاسم: ${tempUserData.name}\nالهاتف: ${tempUserData.phone}\nالبريد: ${tempUserData.email}`);
+  sendNotificationToAdmin("تسجيل حساب جديد ومؤكد!", `الاسم: ${tempUserData.name}\nرقم الهاتف: ${tempUserData.phone}\nالبريد الإلكتروني: ${tempUserData.email}\nكود التفعيل: ${generatedOTP}\nالتاريخ: ${tempUserData.date}`);
 
-  alert("تم تأكيد البريد الإلكتروني وإنشاء حسابك بنجاح!");
+  alert("تم تأكيد الحساب وإنشاؤه بنجاح!");
   closeModal('authModal');
   
   currentUser = {name: tempUserData.name, email: tempUserData.email, phone: tempUserData.phone, admin: false};
@@ -440,7 +454,7 @@ function updateUserBar(){
   }
   bar.innerHTML=`
     <span>👤 ${esc(currentUser.name)}</span>
-    <button class="btn success" onclick="openProfileSettings()">⚙️️ إعدادات الحساب</button>
+    <button class="btn success" onclick="openProfileSettings()">⚙ إعدادات الحساب</button>
     ${currentUser.admin?'<span class="admin">ADMIN</span><button class="btn" onclick="openAdmin()">لوحة التحكم</button>':''}
     <button class="btn danger" onclick="logout()">خروج</button>
   `;
@@ -520,15 +534,11 @@ function confirmPay(){
   purchases.push(purchaseRecord);
   save();
 
-  sendNotificationToAdmin("عملية شراء جديدة!", `تم شراء اللعبة: ${activePayGame.name}\nالسعر: ${activePayGame.price}\nبواسطة: ${purchaseRecord.user}`);
+  sendNotificationToAdmin("عملية شراء جديدة!", `اسم اللعبة: ${activePayGame.name}\nالسعر: ${activePayGame.price}\nالعميل: ${purchaseRecord.user}\nالتاريخ: ${purchaseRecord.date}`);
 
-  alert(`تم تسجيل العملية بنجاح للعبة: ${activePayGame.name}\nوإرسال البيانات إلى aw334948@gmail.com`);
+  alert(`تم تسجيل عملية الشراء بنجاح للعبة: ${activePayGame.name}`);
   closeModal("payModal");
   if (activePayGame.download) window.open(activePayGame.download, "_blank");
-}
-
-function sendNotificationToAdmin(subject, text) {
-  console.log(`[إشعار للمسؤول aw334948@gmail.com]\nالموضوع: ${subject}\nبيانات العملية:\n${text}`);
 }
 
 function openAdmin(){
