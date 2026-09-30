@@ -29,7 +29,8 @@ button{cursor:pointer;border:0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
 .card{background:#111a29;border:1px solid #25334a;border-radius:13px;overflow:hidden;transition:.25s}.card:hover{transform:translateY(-4px);border-color:#00bcd4}
 .info{padding:16px}.info h3{margin-bottom:8px}.info p{color:#9eabc0;font-size:14px;line-height:1.6;height:45px;overflow:hidden}.meta{display:flex;justify-content:space-between;color:#7defff;font-size:13px;margin:12px 0}
-.price{color:#ffca28;font-weight:bold;font-size:16px;margin-bottom:8px}
+.price{color:#ffca28;font-weight:bold;font-size:15px;margin-bottom:8px;display:flex;flex-direction:column;gap:3px}
+.price .coin-p{color:#ffd700}.price .card-p{color:#00e676}
 
 .payment-methods-section{background:#101a2b;border:1px solid #25334a;border-radius:14px;padding:25px;margin:40px auto;max-width:1200px}
 .payment-methods-section h2{color:#00d9ff;margin-bottom:15px;text-align:center}
@@ -216,14 +217,14 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   
   <label>اختر طريقة الدفع:</label>
   <select id="paySelect" onchange="togglePaymentFields()">
-    <option value="coins">🪙 الشراء المباشر بالكوينز (خصم فوري)</option>
+    <option value="coins">🪙 الشراء المباشر بالكوينز (خصم فوري بدون موافقة)</option>
     <option value="card">💳 بطاقة بنكية (Visa / MasterCard)</option>
     <option value="instapay">⚡ InstaPay (انستا باي)</option>
     <option value="wallet">📱 محفظة إلكترونية</option>
   </select>
 
   <div id="coinsFields" style="margin-top: 15px; background: #0c1829; padding: 12px; border-radius: 8px; border: 1px solid #00bcd4;">
-    <p style="color:#72efff;font-size:13px;">⚡ الشراء بالكوينز سريع وفوري، يتم الخصم فوراً وتفعيل اللعبة مع إشعار للمسؤول تلقائياً!</p>
+    <p style="color:#72efff;font-size:13px;">⚡ الشراء بالكوينز يتم فوراً بدون انتظار! يتم الخصم وتفعيل رابط التحميل لك فوراً وتلقائياً.</p>
   </div>
 
   <div id="cardFields" class="hidden" style="margin-top: 15px;">
@@ -253,13 +254,13 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 <h2>🛠️ لوحة تحكم المسؤول</h2>
 <div class="notice">البريد المعتمد لاستلام الإشعارات: <b>aw334948@gmail.com</b></div>
 
-<h3>⏳ طلبات شحن الكوينز والدفع المعلقة:</h3>
+<h3>⏳ طلبات شحن الكوينز والشراء بالبطاقات (في انتظار الموافقة):</h3>
 <div id="pendingOrders" style="background:#0a1220;padding:12px;border-radius:8px;max-height:200px;overflow:auto;margin-bottom:20px;border:1px dashed #ff9800"></div>
 
-<h3>📜 سجل الشراء الفوري بالكوينز:</h3>
-<div id="coinPurchasesLog" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px;border:1px solid #00bcd4"></div>
+<h3>📜 سجل المشتريات الفورية بالكوينز:</h3>
+<div id="instantLogs" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px;border:1px solid #00bcd4"></div>
 
-<h3>👥 قائمة الحسابات المسجلة:</h3>
+<h3>👥 قائمة جميع الحسابات المسجلة:</h3>
 <div id="registeredUsers" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px"></div>
 
 <h3>➕ إضافة لعبة جديدة:</h3>
@@ -274,7 +275,13 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   <option value="adventure">مغامرات</option>
   <option value="sports">رياضة</option>
 </select>
-<input id="gPrice" placeholder="مثال: 100 كوينز أو مجاني">
+
+<label style="color:#ffd700;font-size:13px;display:block;margin-top:5px">سعر الكوينز (مثال: 600 أو 500 أو 0 للمجاني - حتى 100000 كوينز):</label>
+<input id="gCoinPrice" type="number" min="0" max="100000" placeholder="مثال: 600 (اتركه 0 إذا كان مجاني)">
+
+<label style="color:#00e676;font-size:13px;display:block;margin-top:5px">سعر البطاقات البنكية / المحافظ ($ / EGP) (مثال: $15 أو 300 EGP):</label>
+<input id="gCardPrice" placeholder="مثال: $15 أو مجاني">
+
 <input id="gDownload" placeholder="رابط التحميل الرسمى">
 <input id="gSize" placeholder="الحجم، مثال: 12 GB">
 <input id="gRating" type="number" min="0" max="5" step=".1" placeholder="التقييم من 5">
@@ -291,14 +298,15 @@ const FORMSPREE_URL = "https://formspree.io/f/mjyklodg";
 const ADMIN_EMAILS = ["aw334948@gmail.com", "oeid66707@gmail.com"];
 
 const defaultGames = [
-  {name:"GTA VI",platform:"pc",category:"action",price:"300 كوينز",download:"https://store.rockstargames.com/",size:"150 GB",rating:5.0,desc:"أقوى لعبة عالم مفتوح قادمة."},
-  {name:"Minecraft",platform:"pc",category:"adventure",price:"150 كوينز",download:"https://www.minecraft.net/",size:"2 GB",rating:4.8,desc:"لعبة بناء واستكشاف عالم مفتوح."},
-  {name:"PUBG Mobile",platform:"mobile",category:"action",price:"مجاني",download:"https://www.pubgmobile.com/",size:"2.5 GB",rating:4.6,desc:"لعبة باتل رويال الشهيرة للهواتف."}
+  {name:"GTA VI",platform:"pc",category:"action",coinPrice:300,cardPrice:"$60",download:"https://store.rockstargames.com/",size:"150 GB",rating:5.0,desc:"أقوى لعبة عالم مفتوح قادمة."},
+  {name:"Minecraft",platform:"pc",category:"adventure",coinPrice:150,cardPrice:"$30",download:"https://www.minecraft.net/",size:"2 GB",rating:4.8,desc:"لعبة بناء واستكشاف عالم مفتوح."},
+  {name:"PUBG Mobile",platform:"mobile",category:"action",coinPrice:0,cardPrice:"مجاني",download:"https://www.pubgmobile.com/",size:"2.5 GB",rating:4.6,desc:"لعبة باتل رويال الشهيرة للهواتف."}
 ];
 
 let games = JSON.parse(localStorage.getItem("allgames")||"null")||defaultGames;
 let users = JSON.parse(localStorage.getItem("pcusers")||"[]");
 let orders = JSON.parse(localStorage.getItem("orders")||"[]");
+let instantLogs = JSON.parse(localStorage.getItem("instantLogs")||"[]");
 let currentUser = JSON.parse(localStorage.getItem("pcuser")||"null");
 let currentPlatform = "pc";
 let category = "all";
@@ -310,6 +318,7 @@ function save(){
   localStorage.setItem("allgames",JSON.stringify(games));
   localStorage.setItem("pcusers",JSON.stringify(users));
   localStorage.setItem("orders",JSON.stringify(orders));
+  localStorage.setItem("instantLogs",JSON.stringify(instantLogs));
 }
 
 function sendNotificationToAdmin(subject, text) {
@@ -390,7 +399,7 @@ function login(){
     if(!u)return authMessage("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
     currentUser={name:u.name,email:u.email,phone:u.phone||"غير محدد",coins:u.coins||0,admin:false};
   }
-  localStorage.setItem("pcuser",JSON.stringify(currentUser));closeModal("authModal");updateUserBar();
+  localStorage.setItem("pcuser",JSON.stringify(currentUser));closeModal("authModal");updateUserBar();render();
 }
 
 function updateUserBar(){
@@ -441,83 +450,73 @@ function openPay(i){
   if(!currentUser) return openModal('authModal');
   activePayGame=games[i];
 
-  if (isGamePurchased(activePayGame.name)) {
+  if (hasUserBoughtGame(activePayGame.name) || checkIfFree(activePayGame.coinPrice, activePayGame.cardPrice)) {
     window.open(activePayGame.download, '_blank');
     return;
   }
 
   document.getElementById("payModalTitle").textContent = "🛒 شراء لعبة";
-  document.getElementById("payInfo").innerHTML=`<p>اللعبة: <b>${esc(activePayGame.name)}</b></p><p>السعر: <b>${esc(activePayGame.price)}</b></p>`;
+  const cPrice = activePayGame.coinPrice || 0;
+  const cardP = activePayGame.cardPrice || "غير محدد";
+  document.getElementById("payInfo").innerHTML=`<p>اللعبة: <b>${esc(activePayGame.name)}</b></p><p>السعر بالكوينز: <b>🪙 ${cPrice} كوينز</b></p><p>السعر بالبطاقات/المحافظ: <b>💳 ${esc(cardP)}</b></p>`;
   togglePaymentFields();
   openModal("payModal");
-}
-
-function isGamePurchased(gameName) {
-  if (checkIfFree(activePayGame?.price)) return true;
-  const user = users.find(u => u.email === currentUser?.email);
-  if (!user) return false;
-  return (user.purchasedGames || []).includes(gameName);
 }
 
 function confirmPay(){
   if (!activePayGame || !currentUser) return;
   const payMethod = document.getElementById("paySelect").value;
 
-  // الشراء المباشر بالكوينز بدون الحاجة لموافقة
+  // 1. الشراء المباشر والخصم الفوري عبر الكوينز دون انتظار موافقة
   if(payMethod === "coins") {
-    const priceNum = parseInt(activePayGame.price) || 0;
+    const priceNum = parseInt(activePayGame.coinPrice) || 0;
     const user = users.find(u => u.email === currentUser.email);
     const userCoins = user ? (user.coins || 0) : (currentUser.coins || 0);
 
     if(userCoins < priceNum) {
-      return alert(`عذراً! رصيدك (${userCoins} كوينز) لا يكفي لشراء اللعبة (${priceNum} كوينز).\nيرجى شحن رصيدك بالضغط على زر "شراء كوينز".`);
+      return alert(`عذراً! رصيدك (${userCoins} كوينز) لا يكفي لشراء اللعبة (${priceNum} كوينز).\nيرجى شحن رصيدك بالضغط على "شراء كوينز".`);
     }
 
-    // خصم الكوينز فوراً وإضافة اللعبة للمشتريات
+    // خصم الكوينز فوراً
     if(user) {
       user.coins -= priceNum;
-      if (!user.purchasedGames) user.purchasedGames = [];
-      if (!user.purchasedGames.includes(activePayGame.name)) {
-        user.purchasedGames.push(activePayGame.name);
-      }
+      if(!user.purchasedGames) user.purchasedGames = [];
+      user.purchasedGames.push(activePayGame.name);
     }
     currentUser.coins -= priceNum;
 
-    // تسجيل الطلب كمقبول وفوري
-    const instantOrder = {
-      id: Date.now(),
-      type: "instant_coin_purchase",
+    // تسجيل العملية في سجل المشتريات الفورية
+    const logItem = {
       userEmail: currentUser.email,
       gameName: activePayGame.name,
-      coinsDeducted: priceNum,
-      details: `شراء لعبة ${activePayGame.name} فورياً بالكوينز (تم خصم ${priceNum} كوينز)`,
-      status: "approved",
+      coinsSpent: priceNum,
       date: new Date().toLocaleString()
     };
-    orders.push(instantOrder);
+    instantLogs.push(logItem);
 
     save();
     updateUserBar();
     render();
 
-    // إرسال إشعار فوري للمسؤول أن العميل اشترى اللعبة وتم الخصم منه
-    sendNotificationToAdmin("🎮 عملية شراء لعبة جديدة بالكوينز (شراء فوري)!", 
-      `العميل: ${currentUser.email}\nاللعبة التي تم شاؤها: ${activePayGame.name}\nالكوينز المخصومة: ${priceNum} كوينز\nتاريخ العملية: ${instantOrder.date}\n\nتم الخصم وتحرير اللعبة للمستخدم تلقائياً بدون الحاجة لموافقة.`
+    // إرسال إشعار فوري لك بالعملية عبر البريد الإلكتروني
+    sendNotificationToAdmin(
+      `تم شراء لعبة بالكوينز فورياً: ${activePayGame.name} 🎮`,
+      `العميل: ${currentUser.email}\nاللعبة: ${activePayGame.name}\nعدد الكوينز المخصومة: ${priceNum} كوينز\nتاريخ الشراء: ${logItem.date}`
     );
 
-    alert(`🎉 تم الشراء بنجاح بالكوينز دون الحاجة لموافقة!\nتم خصم ${priceNum} كوينز وتفعيل اللعبة لحسابك.\nرابط التحميل: ${activePayGame.download}`);
+    alert(`🎉 تم الخصم والشراء بنجاح بالكوينز بدون انتظار موافقة!\nتم خصم ${priceNum} كوينز. جارٍ فتح رابط التحميل...`);
     window.open(activePayGame.download, '_blank');
     closeModal("payModal");
     return;
   }
 
-  // إذا كانت طريقة الدفع بأساليب أخرى (تتطلب موافقة)
+  // 2. الدفع بالطرق الأخرى (بطاقة / InstaPay) -> يحتاج موافقة أدمن
   const newOrder = {
     id: Date.now(),
     type: "game_purchase",
     userEmail: currentUser.email,
     gameName: activePayGame.name,
-    details: `شراء لعبة ${activePayGame.name} (السعر: ${activePayGame.price}) عبر ${payMethod}`,
+    details: `شراء لعبة ${activePayGame.name} (السعر: ${activePayGame.cardPrice || "غير محدد"}) عبر ${payMethod}`,
     status: "pending",
     date: new Date().toLocaleString()
   };
@@ -525,10 +524,11 @@ function confirmPay(){
   orders.push(newOrder);
   save();
 
-  sendNotificationToAdmin("طلب شراء لعبة جديد يحتاج موافقتك! 🎮", `رقم الطلب: ${newOrder.id}\nالعميل: ${currentUser.email}\nالتفاصيل: ${newOrder.details}`);
+  sendNotificationToAdmin("طلب شراء لعبة جديد بالبطاقة/InstaPay يحتاج موافقتك! 🎮", `رقم الطلب: ${newOrder.id}\nالعميل: ${currentUser.email}\nالتفاصيل: ${newOrder.details}`);
 
-  alert("تم إرسال الطلب بنجاح! سيتم تفعيل طلبك فور موافقة المسؤول.");
+  alert("تم إرسال الطلب بنجاح! سيتم تفعيل إمكانية التحميل لك فور موافقة المسؤول.");
   closeModal("payModal");
+  render();
 }
 
 function openAdmin(){
@@ -546,21 +546,21 @@ function openAdmin(){
         <p><b>العميل:</b> ${o.userEmail}</p>
         <p><b>التفاصيل:</b> ${o.details}</p>
         <div style="display:flex;gap:10px;margin-top:8px">
-          <button class="btn success" onclick="approveOrder(${o.id})">🟢 موافقة</button>
+          <button class="btn success" onclick="approveOrder(${o.id})">🟢 موافقة وإرسال إشعار</button>
           <button class="btn danger" onclick="rejectOrder(${o.id})">🔴 رفض</button>
         </div>
       </div>
     `).join('');
   }
 
-  const coinLogBox = document.getElementById("coinPurchasesLog");
-  const coinPurchases = orders.filter(o => o.type === "instant_coin_purchase");
-  if(!coinPurchases.length) {
-    coinLogBox.innerHTML = "لا توجد عمليات شراء بالكوينز بعد.";
+  // عرض سجل العملات الفورية
+  const logBox = document.getElementById("instantLogs");
+  if(!instantLogs.length) {
+    logBox.innerHTML = "لا توجد مشتريات فورية بالكوينز حتى الآن.";
   } else {
-    coinLogBox.innerHTML = coinPurchases.map(o => `
-      <div style="padding:6px 0;border-bottom:1px solid #202c40;font-size:13px">
-        <span>🛒 <b>${esc(o.userEmail)}</b> اشترى <b>${esc(o.gameName)}</b> (-${o.coinsDeducted} كوينز) - <small style="color:#8492a7">${o.date}</small></span>
+    logBox.innerHTML = instantLogs.map(l => `
+      <div style="font-size:12px;padding:6px 0;border-bottom:1px solid #233248">
+        🎮 <b>${esc(l.gameName)}</b> | 👤 ${esc(l.userEmail)} | 🪙 <b>${l.coinsSpent} كوينز</b> | 🕒 ${l.date}
       </div>
     `).join('');
   }
@@ -586,10 +586,8 @@ function approveOrder(orderId){
   } else if(o.type === "game_purchase") {
     const user = users.find(u => u.email === o.userEmail);
     if(user) {
-      if (!user.purchasedGames) user.purchasedGames = [];
-      if (!user.purchasedGames.includes(o.gameName)) {
-        user.purchasedGames.push(o.gameName);
-      }
+      if(!user.purchasedGames) user.purchasedGames = [];
+      user.purchasedGames.push(o.gameName);
     }
   }
 
@@ -597,7 +595,14 @@ function approveOrder(orderId){
   updateUserBar();
   render();
   openAdmin();
-  alert("🟢 تمت الموافقة بنجاح وتفعيل الشراء/الكوينز للمستخدم!");
+
+  // إرسال إشعار إيميل للمستخدم بالموافقة
+  sendNotificationToAdmin(
+    `تمت الموافقة على طلبك بنجاح! 🎉`,
+    `مرحباً، تم قبول وتفعيل طلبك (${o.details}) بنجاح! يمكنك الآن الدخول للموقع وتحميل اللعبة أو استخدام الكوينز.`
+  );
+
+  alert("🟢 تمت الموافقة! تم إرسال الإشعار وتفعيل الطلب للمستخدم فوراً.");
 }
 
 function rejectOrder(orderId){
@@ -612,13 +617,17 @@ function rejectOrder(orderId){
 function setPlatform(p){currentPlatform=p;document.getElementById("pTabPc").classList.toggle("active", p==='pc');document.getElementById("pTabMobile").classList.toggle("active", p==='mobile');render();}
 function setCat(c,b){category=c;document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");render();}
 function catName(c){return {action:"أكشن",racing:"سباق",adventure:"مغامرات",sports:"رياضة"}[c]||c}
-function checkIfFree(priceStr){if(!priceStr)return true;const p=String(priceStr).trim().toLowerCase();return p==="0"||p==="0$"||p==="مجاني"||p.includes("free");}
+function checkIfFree(cPrice, cardPrice){
+  if(cPrice === 0) return true;
+  if(cardPrice && (cardPrice.trim() === "مجاني" || cardPrice.trim() === "0" || cardPrice.toLowerCase() === "free")) return true;
+  return false;
+}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function openModal(id){document.getElementById(id).classList.add("show")}
 function closeModal(id){document.getElementById(id).classList.remove("show")}
 function showAuth(type){document.getElementById("loginForm").classList.toggle("hidden",type!=="login");document.getElementById("signupForm").classList.toggle("hidden",type!=="signup");document.getElementById("otpForm").classList.add("hidden");document.getElementById("loginTab").classList.toggle("active",type==="login");document.getElementById("signupTab").classList.toggle("active",type==="signup");document.getElementById("authMsg").textContent="";}
 function authMessage(t){document.getElementById("authMsg").textContent=t}
-function logout(){currentUser=null;localStorage.removeItem("pcuser");updateUserBar();closeModal("adminModal")}
+function logout(){currentUser=null;localStorage.removeItem("pcuser");updateUserBar();render();closeModal("adminModal")}
 
 function togglePaymentFields(){
   const method=document.getElementById("paySelect").value;
@@ -633,6 +642,13 @@ function toggleCoinPayFields(){
   document.getElementById("coinCardFields").classList.toggle("hidden",method!=="card");
 }
 
+function hasUserBoughtGame(gameName) {
+  if(!currentUser) return false;
+  const user = users.find(u => u.email === currentUser.email);
+  if(!user || !user.purchasedGames) return false;
+  return user.purchasedGames.includes(gameName);
+}
+
 function render(){
   const q=document.getElementById("search").value.toLowerCase().trim();
   const list=games.filter(g=>g.platform===currentPlatform && (category==="all"||g.category===category) && g.name.toLowerCase().includes(q));
@@ -641,24 +657,36 @@ function render(){
   
   list.forEach((g)=>{
     const realIndex=games.indexOf(g);
-    const isFree = checkIfFree(g.price);
-    const purchased = isGamePurchased(g.name);
+    const isFree = checkIfFree(g.coinPrice, g.cardPrice);
+    const isBought = hasUserBoughtGame(g.name);
+    
+    // فحص الطلبات المعلقة
+    const pendingOrder = currentUser ? orders.find(o => o.userEmail === currentUser.email && o.gameName === g.name && o.status === "pending") : null;
 
-    let btnText = 'شراء / طلب';
-    if (isFree || purchased) {
-      btnText = '📥 تحميل اللعبة';
+    let actionBtn = `<button class="btn success" onclick="openPay(${realIndex})">شراء / طلب</button>`;
+    
+    if (isFree || isBought) {
+      actionBtn = `<button class="btn success" onclick="openPay(${realIndex})">📥 تحميل اللعبة</button>`;
+    } else if (pendingOrder) {
+      actionBtn = `<button class="btn warning" style="font-size:12px" onclick="alert('طلبك قيد المراجعة من الأدمن!')">⏳ قيد المراجعة</button>`;
     }
+
+    const coinText = (g.coinPrice === 0 || !g.coinPrice) ? "مجاني" : `${g.coinPrice} كوينز`;
+    const cardText = g.cardPrice || "مجاني";
 
     grid.innerHTML+=`
       <article class="card">
         <div class="info">
           <h3>${esc(g.name)}</h3>
           <p>${esc(g.desc)}</p>
-          <div class="price">${purchased ? '✅ تم الشراء' : esc(g.price||"مجاني")}</div>
+          <div class="price">
+            <span class="coin-p">🪙 ${esc(coinText)}</span>
+            <span class="card-p">💳 ${esc(cardText)}</span>
+          </div>
           <div class="meta"><span>${catName(g.category)}</span><span>⭐ ${g.rating||0}/5</span></div>
           <div class="actions">
             <button class="btn secondary" onclick="details(${realIndex})">التفاصيل</button>
-            <button class="btn ${purchased || isFree ? 'success' : 'warning'}" onclick="openPay(${realIndex})">${btnText}</button>
+            ${actionBtn}
           </div>
         </div>
       </article>`;
@@ -667,26 +695,55 @@ function render(){
 
 function details(i){
   const g=games[i];
-  const purchased = isGamePurchased(g.name);
+  const coinText = (g.coinPrice === 0 || !g.coinPrice) ? "مجاني" : `${g.coinPrice} كوينز`;
+  const cardText = g.cardPrice || "مجاني";
+  
   document.getElementById("details").innerHTML=`
     <h2>${esc(g.name)}</h2>
     <p>${esc(g.desc)}</p>
-    <p>السعر: <b>${purchased ? '✅ تم الشراء' : esc(g.price)}</b><br>الحجم: ${esc(g.size)}</p>
-    <button class="btn success" style="width:100%" onclick="closeModal('detailsModal');openPay(${i})">${purchased ? '📥 تحميل اللعبة' : 'شراء / طلب'}</button>`;
+    <p>سعر الكوينز: <b>🪙 ${esc(coinText)}</b><br>سعر البطاقات/المحافظ: <b>💳 ${esc(cardText)}</b><br>الحجم: ${esc(g.size)}</p>
+    <button class="btn success" style="width:100%" onclick="closeModal('detailsModal');openPay(${i})">شراء / تحميل</button>`;
   openModal("detailsModal");
 }
 
 function addGame(){
-  const name=document.getElementById("gName").value.trim(),platform=document.getElementById("gPlatform").value,cat=document.getElementById("gCat").value,price=document.getElementById("gPrice").value.trim(),download=document.getElementById("gDownload").value.trim(),size=document.getElementById("gSize").value.trim(),rating=Number(document.getElementById("gRating").value)||0,desc=document.getElementById("gDesc").value.trim();
-  if(!name)return alert("يرجى كتابة اسم اللعبة.");
-  games.push({name,platform,category:cat,price:price||"مجاني",download,size:size||"غير محدد",rating:Math.min(5,rating),desc:desc||"لا يوجد وصف."});
-  save();render();renderAdmin();alert("تمت إضافة اللعبة بنجاح.");
+  const name=document.getElementById("gName").value.trim(),
+        platform=document.getElementById("gPlatform").value,
+        cat=document.getElementById("gCat").value,
+        coinPriceInput=document.getElementById("gCoinPrice").value,
+        cardPriceInput=document.getElementById("gCardPrice").value.trim(),
+        download=document.getElementById("gDownload").value.trim(),
+        size=document.getElementById("gSize").value.trim(),
+        rating=Number(document.getElementById("gRating").value)||0,
+        desc=document.getElementById("gDesc").value.trim();
+
+  if(!name) return alert("يرجى كتابة اسم اللعبة.");
+
+  const coinPrice = Math.min(100000, Math.max(0, parseInt(coinPriceInput) || 0));
+
+  games.push({
+    name,
+    platform,
+    category:cat,
+    coinPrice: coinPrice,
+    cardPrice: cardPriceInput || "مجاني",
+    download,
+    size:size||"غير محدد",
+    rating:Math.min(5,rating),
+    desc:desc||"لا يوجد وصف."
+  });
+
+  save();
+  render();
+  renderAdmin();
+  alert("تمت إضافة اللعبة بنجاح بالسعرين المحددين.");
 }
 
 function renderAdmin(){
   const box=document.getElementById("adminGames");box.innerHTML="";
   games.forEach((g,i)=>{
-    box.innerHTML+=`<div style="background:#0b1320;border:1px solid #27364d;padding:12px;border-radius:8px;margin:8px 0;display:flex;justify-content:space-between"><span>[${g.platform.toUpperCase()}] ${esc(g.name)} - ${esc(g.price)}</span><button class="btn danger" onclick="deleteGame(${i})">حذف</button></div>`;
+    const cP = (g.coinPrice === 0 || !g.coinPrice) ? "مجاني" : `${g.coinPrice} كوينز`;
+    box.innerHTML+=`<div style="background:#0b1320;border:1px solid #27364d;padding:12px;border-radius:8px;margin:8px 0;display:flex;justify-content:space-between"><span>[${g.platform.toUpperCase()}] ${esc(g.name)} - 🪙 ${cP} | 💳 ${esc(g.cardPrice||"مجاني")}</span><button class="btn danger" onclick="deleteGame(${i})">حذف</button></div>`;
   });
 }
 
