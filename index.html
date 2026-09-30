@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Games Hub - متجر الألعاب والعملات</title>
+<!-- تضمين مكتبة EmailJS -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
+  (function() {
+    emailjs.init("c9VmBy9FrmdmK4CS4");
+  })();
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Tahoma,sans-serif}
 body{background:#080d16;color:#fff;min-height:100vh}
@@ -152,13 +159,13 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   <div id="reqSpec">✖ رمز خاص واحد على الأقل (!@#$%^&*)</div>
 </div>
 
-<button class="btn" style="width:100%" onclick="sendOTP()">إرسال كود التحقيق OTP 📩</button>
+<button id="sendOtpBtn" class="btn" style="width:100%" onclick="sendOTP()">إرسال كود التحقيق OTP 📩</button>
 </div>
 
 <div id="otpForm" class="hidden">
 <h2>تأكيد ملكية البريد الإلكتروني</h2>
-<p style="font-size:13px;color:#00d9ff;margin-bottom:10px">تم توليد كود التحقيق المكون من 4 أرقام لتأكيد حسابك.</p>
-<input id="otpInput" type="text" maxlength="4" placeholder="أدخل كود التحقيق (OTP)">
+<p style="font-size:13px;color:#00d9ff;margin-bottom:10px">تم إرسال كود التحقيق (OTP) إلى بريدك الإلكتروني. يرجى إدخاله أدناه:</p>
+<input id="otpInput" type="text" maxlength="4" placeholder="أدخل كود التحقيق (4 أرقام)">
 <button class="btn success" style="width:100%" onclick="verifyOTP()">تأكيد وإنشاء الحساب</button>
 </div>
 
@@ -276,7 +283,7 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   <option value="sports">رياضة</option>
 </select>
 
-<label style="color:#ffd700;font-size:13px;display:block;margin-top:5px">سعر الكوينز (مثال: 600 أو 500 أو 0 للمجاني - حتى 100000 كوينز):</label>
+<label style="color:#ffd700;font-size:13px;display:block;margin-top:5px">سعر الكوينز (مثال: 600 أو 500 - حتى 100000 كوينز):</label>
 <input id="gCoinPrice" type="number" min="0" max="100000" placeholder="مثال: 600 (اتركه 0 إذا كان مجاني)">
 
 <label style="color:#00e676;font-size:13px;display:block;margin-top:5px">سعر البطاقات البنكية / المحافظ ($ / EGP) (مثال: $15 أو 300 EGP):</label>
@@ -351,6 +358,7 @@ function validatePassword() {
   return hasLen && hasUpper && hasLower && hasNum && hasSpec;
 }
 
+// دالة إرسال كود الـ OTP عبر البريد الإلكتروني الحقيقي (EmailJS)
 function sendOTP(){
   const name=document.getElementById("signupName").value.trim();
   const phone=document.getElementById("signupPhone").value.trim();
@@ -361,13 +369,34 @@ function sendOTP(){
   if(!name||!phone||!email||!dob||!pass) return authMessage("يرجى ملء جميع البيانات.");
   if(!validatePassword()) return authMessage("كلمة المرور ضعيفة!");
 
+  const btn = document.getElementById("sendOtpBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ جاري إرسال الكود بريدياً...";
+
+  // توليد رقم عشوائي سري من 4 أرقام
   generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
   tempUserData = {name, phone, email, dob, pass, coins: 0, purchasedGames: [], date: new Date().toLocaleString()};
 
-  document.getElementById("signupForm").classList.add("hidden");
-  document.getElementById("otpForm").classList.remove("hidden");
+  const templateParams = {
+    email: email,
+    name: name,
+    otp_code: generatedOTP
+  };
 
-  alert(`كود التحقيق OTP لتأكيد بريدك الإلكتروني هو: ${generatedOTP}`);
+  // الإرسال الفعلي عبر EmailJS
+  emailjs.send("service_sddh417", "template_fitj5u6", templateParams)
+    .then(function(response) {
+      btn.disabled = false;
+      btn.textContent = "إرسال كود التحقيق OTP 📩";
+      document.getElementById("signupForm").classList.add("hidden");
+      document.getElementById("otpForm").classList.remove("hidden");
+      alert("تم إرسال كود التحقيق (OTP) بنجاح إلى بريدك الإلكتروني!");
+    }, function(error) {
+      btn.disabled = false;
+      btn.textContent = "إرسال كود التحقيق OTP 📩";
+      console.error("EmailJS Error:", error);
+      alert("تعذر إرسال البريد الإلكتروني. يرجى التأكد من صحة البريد والمحاولة لاحقاً.");
+    });
 }
 
 function verifyOTP(){
@@ -467,7 +496,6 @@ function confirmPay(){
   if (!activePayGame || !currentUser) return;
   const payMethod = document.getElementById("paySelect").value;
 
-  // 1. الشراء المباشر والخصم الفوري عبر الكوينز دون انتظار موافقة
   if(payMethod === "coins") {
     const priceNum = parseInt(activePayGame.coinPrice) || 0;
     const user = users.find(u => u.email === currentUser.email);
@@ -477,7 +505,6 @@ function confirmPay(){
       return alert(`عذراً! رصيدك (${userCoins} كوينز) لا يكفي لشراء اللعبة (${priceNum} كوينز).\nيرجى شحن رصيدك بالضغط على "شراء كوينز".`);
     }
 
-    // خصم الكوينز فوراً
     if(user) {
       user.coins -= priceNum;
       if(!user.purchasedGames) user.purchasedGames = [];
@@ -485,7 +512,6 @@ function confirmPay(){
     }
     currentUser.coins -= priceNum;
 
-    // تسجيل العملية في سجل المشتريات الفورية
     const logItem = {
       userEmail: currentUser.email,
       gameName: activePayGame.name,
@@ -498,7 +524,6 @@ function confirmPay(){
     updateUserBar();
     render();
 
-    // إرسال إشعار فوري لك بالعملية عبر البريد الإلكتروني
     sendNotificationToAdmin(
       `تم شراء لعبة بالكوينز فورياً: ${activePayGame.name} 🎮`,
       `العميل: ${currentUser.email}\nاللعبة: ${activePayGame.name}\nعدد الكوينز المخصومة: ${priceNum} كوينز\nتاريخ الشراء: ${logItem.date}`
@@ -510,7 +535,6 @@ function confirmPay(){
     return;
   }
 
-  // 2. الدفع بالطرق الأخرى (بطاقة / InstaPay) -> يحتاج موافقة أدمن
   const newOrder = {
     id: Date.now(),
     type: "game_purchase",
@@ -553,7 +577,6 @@ function openAdmin(){
     `).join('');
   }
 
-  // عرض سجل العملات الفورية
   const logBox = document.getElementById("instantLogs");
   if(!instantLogs.length) {
     logBox.innerHTML = "لا توجد مشتريات فورية بالكوينز حتى الآن.";
@@ -596,7 +619,6 @@ function approveOrder(orderId){
   render();
   openAdmin();
 
-  // إرسال إشعار إيميل للمستخدم بالموافقة
   sendNotificationToAdmin(
     `تمت الموافقة على طلبك بنجاح! 🎉`,
     `مرحباً، تم قبول وتفعيل طلبك (${o.details}) بنجاح! يمكنك الآن الدخول للموقع وتحميل اللعبة أو استخدام الكوينز.`
@@ -659,8 +681,6 @@ function render(){
     const realIndex=games.indexOf(g);
     const isFree = checkIfFree(g.coinPrice, g.cardPrice);
     const isBought = hasUserBoughtGame(g.name);
-    
-    // فحص الطلبات المعلقة
     const pendingOrder = currentUser ? orders.find(o => o.userEmail === currentUser.email && o.gameName === g.name && o.status === "pending") : null;
 
     let actionBtn = `<button class="btn success" onclick="openPay(${realIndex})">شراء / طلب</button>`;
