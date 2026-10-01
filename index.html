@@ -3,14 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Games Hub - متجر الألعاب والعملات</title>
-<!-- تضمين مكتبة EmailJS -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script type="text/javascript">
-  (function() {
-    emailjs.init("c9VmBy9FrmdmK4CS4");
-  })();
-</script>
+<title>Games Hub - ألعاب PC والموبايل</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Tahoma,sans-serif}
 body{background:#080d16;color:#fff;min-height:100vh}
@@ -36,8 +29,10 @@ button{cursor:pointer;border:0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
 .card{background:#111a29;border:1px solid #25334a;border-radius:13px;overflow:hidden;transition:.25s}.card:hover{transform:translateY(-4px);border-color:#00bcd4}
 .info{padding:16px}.info h3{margin-bottom:8px}.info p{color:#9eabc0;font-size:14px;line-height:1.6;height:45px;overflow:hidden}.meta{display:flex;justify-content:space-between;color:#7defff;font-size:13px;margin:12px 0}
-.price{color:#ffca28;font-weight:bold;font-size:15px;margin-bottom:8px;display:flex;flex-direction:column;gap:3px}
-.price .coin-p{color:#ffd700}.price .card-p{color:#00e676}
+.price{color:#ffca28;font-weight:bold;font-size:16px;margin-bottom:8px}
+.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:bold;margin-bottom:8px}
+.badge.preorder{background:#ff9800;color:#000}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions .btn{flex:1}
 
 .payment-methods-section{background:#101a2b;border:1px solid #25334a;border-radius:14px;padding:25px;margin:40px auto;max-width:1200px}
 .payment-methods-section h2{color:#00d9ff;margin-bottom:15px;text-align:center}
@@ -58,12 +53,6 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 .hidden{display:none!important}.notice{background:#1c293c;padding:12px;border-radius:8px;color:#b9c7d9;font-size:13px;margin-bottom:15px}
 .userbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .admin{border:1px solid #00bcd4;background:#0c1725;padding:5px 9px;border-radius:20px;color:#72efff;font-size:12px}
-.coins-badge{background:#ffd700;color:#000;padding:5px 10px;border-radius:15px;font-weight:bold;font-size:14px}
-
-.pass-reqs{background:#0a1220;padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px}
-.pass-reqs div{margin:4px 0;color:#ff5252}
-.pass-reqs div.valid{color:#4caf50}
-
 @media(max-width:700px){nav{display:none}.hero h1{font-size:30px}.search{flex-direction:column;gap:8px}.search input,.search button{border-radius:8px;padding:14px}.nav{padding:12px}}
 </style>
 </head>
@@ -81,8 +70,8 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 </header>
 
 <section class="hero">
-<h1>متجر ومكتبة <span>الألعاب والعملات</span></h1>
-<p>استكشف أفضل الألعاب، واشحن عملاتك بكل سهولة وأمان</p>
+<h1>متجر ومكتبة <span>الألعاب الشاملة</span></h1>
+<p>استكشف أفضل ألعاب الكمبيوتر (PC) وألعاب الموبايل (Mobile)</p>
 <div class="search"><input id="search" placeholder="ابحث عن لعبة..."><button onclick="render()">🔍 بحث</button></div>
 </section>
 
@@ -108,7 +97,7 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 
 <!-- قسم طرق الدفع -->
 <section id="payment-methods" class="payment-methods-section">
-  <h2>💳 طرق الدفع المدعومة للعملات والألعاب</h2>
+  <h2>💳 طرق الدفع المدعومة للألعاب المدفوعة</h2>
   <div class="pay-grid">
     <div class="pay-card">
       <h4>⚡ انستا باي (InstaPay)</h4>
@@ -128,11 +117,11 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 
 <footer>© 2026 <b style="color:#00d9ff">Games Hub</b> — جميع الحقوق محفوظة</footer>
 
-<!-- Auth Modal (تسجيل الحساب والدخول) -->
+<!-- Auth Modal -->
 <div id="authModal" class="modal">
 <div class="box">
 <span class="close" onclick="closeModal('authModal')">×</span>
-<div class="tabs"><button id="loginTab" class="active" onclick="showAuth('login')">تسجيل الدخول</button><button id="signupTab" onclick="showAuth('signup')">إنشاء حساب جديد</button></div>
+<div class="tabs"><button id="loginTab" class="active" onclick="showAuth('login')">تسجيل الدخول</button><button id="signupTab" onclick="showAuth('signup')">إنشاء حساب</button></div>
 
 <div id="loginForm">
 <h2>تسجيل الدخول</h2>
@@ -146,26 +135,15 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 <input id="signupName" placeholder="الاسم الكامل">
 <input id="signupPhone" type="tel" placeholder="رقم الهاتف (مثال: 01012345678)">
 <input id="signupEmail" type="email" placeholder="البريد الإلكتروني">
-<label style="font-size:12px;color:#00d9ff">تاريخ الميلاد:</label>
-<input id="signupDob" type="date">
-
-<input id="signupPass" type="password" placeholder="كلمة المرور القوية" oninput="validatePassword()">
-
-<div class="pass-reqs">
-  <div id="reqLen">✖ 8 أحرف على الأقل</div>
-  <div id="reqUpper">✖ حرف كبير واحد على الأقل (A-Z)</div>
-  <div id="reqLower">✖ حرف صغير واحد على الأقل (a-z)</div>
-  <div id="reqNum">✖ رقم واحد على الأقل (0-9)</div>
-  <div id="reqSpec">✖ رمز خاص واحد على الأقل (!@#$%^&*)</div>
+<input id="signupPass" type="password" placeholder="كلمة المرور">
+<button class="btn" style="width:100%" onclick="sendOTP()">إرسال كود التحقيق 📩</button>
 </div>
 
-<button id="sendOtpBtn" class="btn" style="width:100%" onclick="sendOTP()">إرسال كود التحقيق OTP 📩</button>
-</div>
-
+<!-- نموذج إدخال كود التحقيق الـ OTP -->
 <div id="otpForm" class="hidden">
-<h2>تأكيد ملكية البريد الإلكتروني</h2>
-<p style="font-size:13px;color:#00d9ff;margin-bottom:10px">تم إرسال كود التحقيق (OTP) إلى بريدك الإلكتروني. يرجى إدخاله أدناه:</p>
-<input id="otpInput" type="text" maxlength="4" placeholder="أدخل كود التحقيق (4 أرقام)">
+<h2>تأكيد البريد الإلكتروني</h2>
+<p style="font-size:13px;color:#00d9ff;margin-bottom:10px">تم إرسال كود التحقيق المكون من 4 أرقام إلى بريدك الإلكتروني.</p>
+<input id="otpInput" type="text" maxlength="4" placeholder="أدخل كود التحقيق (OTP)">
 <button class="btn success" style="width:100%" onclick="verifyOTP()">تأكيد وإنشاء الحساب</button>
 </div>
 
@@ -173,40 +151,16 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 </div>
 </div>
 
-<!-- Coins Modal (شحن العملات) -->
-<div id="coinsModal" class="modal">
+<!-- Settings Modal (إعدادات الحساب) -->
+<div id="settingsModal" class="modal">
 <div class="box">
-  <span class="close" onclick="closeModal('coinsModal')">×</span>
-  <h2>🪙 شراء كوينز (Coins)</h2>
-  <p>اختر الباقة المطلوبة واشحن حسابك (تضاف الكوينز لحسابك فور موافقة المسؤول):</p>
-
-  <select id="coinPackageSelect">
-    <option value="100">100 كوينز - $5 USD</option>
-    <option value="500">500 كوينز - $20 USD</option>
-    <option value="1200">1200 كوينز - $45 USD</option>
-  </select>
-
-  <label>اختر طريقة الدفع:</label>
-  <select id="coinPayMethod" onchange="toggleCoinPayFields()">
-    <option value="card">💳 بطاقة بنكية (Visa / MasterCard)</option>
-    <option value="instapay">⚡ InstaPay</option>
-    <option value="wallet">📱 محفظة إلكترونية</option>
-  </select>
-
-  <div id="coinCardFields" style="margin-top:10px;">
-    <input id="cCardNum" placeholder="رقم البطاقة (16 رقم)">
-    <div style="display:flex;gap:8px">
-      <input id="cCardExp" placeholder="MM/YY">
-      <input id="cCardCvc" placeholder="CVC">
-    </div>
-  </div>
-
-  <div id="coinInstaFields" class="hidden" style="margin-top:10px;">
-    <div class="instapay-box">حول لحساب: <b>gameshub@instapay</b></div>
-    <input id="cInstaTx" placeholder="رقم التحويل أو اسم المحول">
-  </div>
-
-  <button class="btn success" style="width:100%;margin-top:15px" onclick="submitCoinOrder()">إرسال طلب الشحن للموافقة ⏳</button>
+  <span class="close" onclick="closeModal('settingsModal')">×</span>
+  <h2>⚙️ إعدادات الحساب</h2>
+  <label>تعديل الاسم:</label>
+  <input id="setProfileName" placeholder="الاسم الجديد">
+  <label>تعديل رقم الهاتف:</label>
+  <input id="setProfilePhone" placeholder="رقم الهاتف الجديد">
+  <button class="btn success" style="width:100%;margin-top:10px" onclick="saveProfileSettings()">حفظ التعديلات</button>
 </div>
 </div>
 
@@ -215,7 +169,7 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 <div class="box"><span class="close" onclick="closeModal('detailsModal')">×</span><div id="details"></div></div>
 </div>
 
-<!-- Pay Modal (شراء لعبة) -->
+<!-- Pay Modal -->
 <div id="payModal" class="modal">
 <div class="box">
   <span class="close" onclick="closeModal('payModal')">×</span>
@@ -224,58 +178,49 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   
   <label>اختر طريقة الدفع:</label>
   <select id="paySelect" onchange="togglePaymentFields()">
-    <option value="coins">🪙 الشراء المباشر بالكوينز (خصم فوري بدون موافقة)</option>
-    <option value="card">💳 بطاقة بنكية (Visa / MasterCard)</option>
     <option value="instapay">⚡ InstaPay (انستا باي)</option>
-    <option value="wallet">📱 محفظة إلكترونية</option>
+    <option value="card">بطاقة بنكية (Visa / MasterCard)</option>
+    <option value="wallet">محفظة إلكترونية (Vodafone Cash)</option>
   </select>
 
-  <div id="coinsFields" style="margin-top: 15px; background: #0c1829; padding: 12px; border-radius: 8px; border: 1px solid #00bcd4;">
-    <p style="color:#72efff;font-size:13px;">⚡ الشراء بالكوينز يتم فوراً بدون انتظار! يتم الخصم وتفعيل رابط التحميل لك فوراً وتلقائياً.</p>
-  </div>
-
-  <div id="cardFields" class="hidden" style="margin-top: 15px;">
-    <input id="cardNumber" type="text" maxlength="19" placeholder="رقم البطاقة (16 رقم)">
-    <div style="display:flex;gap:8px">
-      <input id="cardExp" placeholder="MM/YY">
-      <input id="cardCvc" placeholder="CVC">
-    </div>
-  </div>
-
-  <div id="instapayFields" class="hidden" style="margin-top: 15px;">
+  <div id="instapayFields" style="margin-top: 15px;">
     <div class="instapay-box">
       <p style="font-size:14px;color:#cfdceb">قم بتحويل المبلغ عبر InstaPay إلى معرف الحساب التالي:</p>
       <div class="instapay-num">gameshub@instapay</div>
     </div>
-    <input id="instaSender" type="text" placeholder="اسمك أو رقم المعاملة للتحقق">
+    <input id="instaSender" type="text" placeholder="اسمك أو رقم المعاملة للتحقق من التحويل">
   </div>
 
-  <button class="btn success" style="width:100%;margin-top:15px" onclick="confirmPay()">تأكيد الشراء 🚀</button>
+  <div id="cardFields" class="hidden" style="margin-top: 15px;">
+    <input id="cardNumber" type="text" maxlength="19" placeholder="رقم البطاقة (16 رقم)">
+  </div>
+
+  <div id="walletFields" class="hidden" style="margin-top: 15px;">
+    <input id="walletNumber" type="text" placeholder="رقم المحفظة المستخدم للتحويل">
+  </div>
+
+  <button class="btn success" style="width:100%;margin-top:15px" onclick="confirmPay()">تأكيد وتفعيل العملية</button>
 </div>
 </div>
 
-<!-- Admin Panel (لوحة التحكم) -->
+<!-- Admin Panel -->
 <div id="adminModal" class="modal">
 <div class="box">
 <span class="close" onclick="closeModal('adminModal')">×</span>
 <h2>🛠️ لوحة تحكم المسؤول</h2>
 <div class="notice">البريد المعتمد لاستلام الإشعارات: <b>aw334948@gmail.com</b></div>
 
-<h3>⏳ طلبات شحن الكوينز والشراء بالبطاقات (في انتظار الموافقة):</h3>
-<div id="pendingOrders" style="background:#0a1220;padding:12px;border-radius:8px;max-height:200px;overflow:auto;margin-bottom:20px;border:1px dashed #ff9800"></div>
-
-<h3>📜 سجل المشتريات الفورية بالكوينز:</h3>
-<div id="instantLogs" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px;border:1px solid #00bcd4"></div>
-
-<h3>👥 قائمة جميع الحسابات المسجلة:</h3>
-<div id="registeredUsers" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px"></div>
-
 <h3>➕ إضافة لعبة جديدة:</h3>
+<label>اسم اللعبة:</label>
 <input id="gName" placeholder="اسم اللعبة">
+
+<label>المنصة:</label>
 <select id="gPlatform">
   <option value="pc">💻 لعبة PC</option>
   <option value="mobile">📱 لعبة Mobile</option>
 </select>
+
+<label>التصنيف:</label>
 <select id="gCat">
   <option value="action">أكشن</option>
   <option value="racing">سباق</option>
@@ -283,17 +228,34 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
   <option value="sports">رياضة</option>
 </select>
 
-<label style="color:#ffd700;font-size:13px;display:block;margin-top:5px">سعر الكوينز (مثال: 600 أو 500 - حتى 100000 كوينز):</label>
-<input id="gCoinPrice" type="number" min="0" max="100000" placeholder="مثال: 600 (اتركه 0 إذا كان مجاني)">
+<label>حالة الشراء / الإتاحة:</label>
+<select id="gType">
+  <option value="normal">تحميل / شراء عادي</option>
+  <option value="preorder">طلب مسبق (Pre-Order)</option>
+</select>
 
-<label style="color:#00e676;font-size:13px;display:block;margin-top:5px">سعر البطاقات البنكية / المحافظ ($ / EGP) (مثال: $15 أو 300 EGP):</label>
-<input id="gCardPrice" placeholder="مثال: $15 أو مجاني">
+<label>السعر (اكتب: مجاني أو 0 أو السعر بالجنيه/الدولار):</label>
+<input id="gPrice" placeholder="مثال: مجاني أو 0 أو 150 ج.م">
 
+<label>رابط التحميل / الصفحة الرسمية:</label>
 <input id="gDownload" placeholder="رابط التحميل الرسمى">
+
+<label>الحجم وتقييم اللعبة:</label>
 <input id="gSize" placeholder="الحجم، مثال: 12 GB">
 <input id="gRating" type="number" min="0" max="5" step=".1" placeholder="التقييم من 5">
+
+<label>وصف اللعبة:</label>
 <textarea id="gDesc" placeholder="وصف اللعبة"></textarea>
+
 <button class="btn" style="width:100%;margin-bottom:20px" onclick="addGame()">➕ إضافة اللعبة</button>
+
+<hr style="border:0;border-top:1px solid #27364d;margin:20px 0">
+
+<h3>👥 قائمة جميع الحسابات المسجلة:</h3>
+<div id="registeredUsers" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px"></div>
+
+<h3>🛒 سجل عمليات الشراء:</h3>
+<div id="purchaseHistory" style="background:#0a1220;padding:12px;border-radius:8px;max-height:150px;overflow:auto;margin-bottom:20px"></div>
 
 <h3>🎮 الألعاب الحالية:</h3>
 <div id="adminGames"></div>
@@ -301,22 +263,21 @@ footer{text-align:center;padding:35px;color:#8492a7;border-top:1px solid #202c40
 </div>
 
 <script>
-const FORMSPREE_URL = "https://formspree.io/f/mjyklodg";
-const ADMIN_EMAILS = ["aw334948@gmail.com", "oeid66707@gmail.com"];
+const ADMIN_EMAILS=["aw334948@gmail.com","oeid66707@gmail.com"];
 
-const defaultGames = [
-  {name:"GTA VI",platform:"pc",category:"action",coinPrice:300,cardPrice:"$60",download:"https://store.rockstargames.com/",size:"150 GB",rating:5.0,desc:"أقوى لعبة عالم مفتوح قادمة."},
-  {name:"Minecraft",platform:"pc",category:"adventure",coinPrice:150,cardPrice:"$30",download:"https://www.minecraft.net/",size:"2 GB",rating:4.8,desc:"لعبة بناء واستكشاف عالم مفتوح."},
-  {name:"PUBG Mobile",platform:"mobile",category:"action",coinPrice:0,cardPrice:"مجاني",download:"https://www.pubgmobile.com/",size:"2.5 GB",rating:4.6,desc:"لعبة باتل رويال الشهيرة للهواتف."}
+const defaultGames=[
+  {name:"GTA VI",platform:"pc",category:"action",type:"preorder",price:"300 ج.م",download:"https://store.rockstargames.com/",size:"150 GB",rating:5.0,desc:"طلب مسبق لأقوى لعبة عالم مفتوح قادمة."},
+  {name:"Minecraft",platform:"pc",category:"adventure",type:"normal",price:"150 ج.م",download:"https://www.minecraft.net/",size:"2 GB",rating:4.8,desc:"لعبة بناء واستكشاف عالم مفتوح للكمبيوتر."},
+  {name:"PUBG Mobile",platform:"mobile",category:"action",type:"normal",price:"مجاني",download:"https://www.pubgmobile.com/",size:"2.5 GB",rating:4.6,desc:"لعبة باتل رويال الشهيرة للهواتف الذكية."},
+  {name:"Project Mugen",platform:"mobile",category:"adventure",type:"preorder",price:"0",download:"https://genshin.hoyoverse.com/",size:"غير محدد",rating:4.9,desc:"تسجيل طلب مسبق مجاني للعبة المستقبلية."}
 ];
 
-let games = JSON.parse(localStorage.getItem("allgames")||"null")||defaultGames;
-let users = JSON.parse(localStorage.getItem("pcusers")||"[]");
-let orders = JSON.parse(localStorage.getItem("orders")||"[]");
-let instantLogs = JSON.parse(localStorage.getItem("instantLogs")||"[]");
-let currentUser = JSON.parse(localStorage.getItem("pcuser")||"null");
-let currentPlatform = "pc";
-let category = "all";
+let games=JSON.parse(localStorage.getItem("allgames")||"null")||defaultGames;
+let users=JSON.parse(localStorage.getItem("pcusers")||"[]");
+let purchases=JSON.parse(localStorage.getItem("purchases")||"[]");
+let currentUser=JSON.parse(localStorage.getItem("pcuser")||"null");
+let currentPlatform="pc";
+let category="all";
 
 let generatedOTP = null;
 let tempUserData = null;
@@ -324,351 +285,22 @@ let tempUserData = null;
 function save(){
   localStorage.setItem("allgames",JSON.stringify(games));
   localStorage.setItem("pcusers",JSON.stringify(users));
-  localStorage.setItem("orders",JSON.stringify(orders));
-  localStorage.setItem("instantLogs",JSON.stringify(instantLogs));
+  localStorage.setItem("purchases",JSON.stringify(purchases));
 }
 
-function sendNotificationToAdmin(subject, text) {
-  fetch(FORMSPREE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ _subject: subject, message: text })
-  }).catch(err => console.error(err));
-}
-
-function validatePassword() {
-  const pass = document.getElementById("signupPass").value;
-  const hasLen = pass.length >= 8;
-  const hasUpper = /[A-Z]/.test(pass);
-  const hasLower = /[a-z]/.test(pass);
-  const hasNum = /[0-9]/.test(pass);
-  const hasSpec = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-
-  document.getElementById("reqLen").className = hasLen ? "valid" : "";
-  document.getElementById("reqLen").textContent = (hasLen ? "✔" : "✖") + " 8 أحرف على الأقل";
-  document.getElementById("reqUpper").className = hasUpper ? "valid" : "";
-  document.getElementById("reqUpper").textContent = (hasUpper ? "✔" : "✖") + " حرف كبير واحد على الأقل (A-Z)";
-  document.getElementById("reqLower").className = hasLower ? "valid" : "";
-  document.getElementById("reqLower").textContent = (hasLower ? "✔" : "✖") + " حرف صغير واحد على الأقل (a-z)";
-  document.getElementById("reqNum").className = hasNum ? "valid" : "";
-  document.getElementById("reqNum").textContent = (hasNum ? "✔" : "✖") + " رقم واحد على الأقل (0-9)";
-  document.getElementById("reqSpec").className = hasSpec ? "valid" : "";
-  document.getElementById("reqSpec").textContent = (hasSpec ? "✔" : "✖") + " رمز خاص واحد على الأقل (!@#$%^&*)";
-
-  return hasLen && hasUpper && hasLower && hasNum && hasSpec;
-}
-
-// دالة إرسال كود الـ OTP عبر البريد الإلكتروني الحقيقي (EmailJS)
-function sendOTP(){
-  const name=document.getElementById("signupName").value.trim();
-  const phone=document.getElementById("signupPhone").value.trim();
-  const email=document.getElementById("signupEmail").value.trim().toLowerCase();
-  const dob=document.getElementById("signupDob").value;
-  const pass=document.getElementById("signupPass").value;
-
-  if(!name||!phone||!email||!dob||!pass) return authMessage("يرجى ملء جميع البيانات.");
-  if(!validatePassword()) return authMessage("كلمة المرور ضعيفة!");
-
-  const btn = document.getElementById("sendOtpBtn");
-  btn.disabled = true;
-  btn.textContent = "⏳ جاري إرسال الكود بريدياً...";
-
-  // توليد رقم عشوائي سري من 4 أرقام
-  generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-  tempUserData = {name, phone, email, dob, pass, coins: 0, purchasedGames: [], date: new Date().toLocaleString()};
-
-  const templateParams = {
-    email: email,
-    name: name,
-    otp_code: generatedOTP
-  };
-
-  // الإرسال الفعلي عبر EmailJS
-  emailjs.send("service_sddh417", "template_fitj5u6", templateParams)
-    .then(function(response) {
-      btn.disabled = false;
-      btn.textContent = "إرسال كود التحقيق OTP 📩";
-      document.getElementById("signupForm").classList.add("hidden");
-      document.getElementById("otpForm").classList.remove("hidden");
-      alert("تم إرسال كود التحقيق (OTP) بنجاح إلى بريدك الإلكتروني!");
-    }, function(error) {
-      btn.disabled = false;
-      btn.textContent = "إرسال كود التحقيق OTP 📩";
-      console.error("EmailJS Error:", error);
-      alert("تعذر إرسال البريد الإلكتروني. يرجى التأكد من صحة البريد والمحاولة لاحقاً.");
-    });
-}
-
-function verifyOTP(){
-  const inputOTP = document.getElementById("otpInput").value.trim();
-  if(!inputOTP || inputOTP !== generatedOTP) return alert("كود التحقيق غير صحيح!");
-
-  users.push(tempUserData);
-  save();
-
-  sendNotificationToAdmin("تسجيل حساب جديد ومؤكد!", `الاسم: ${tempUserData.name}\nالبريد: ${tempUserData.email}\nالهاتف: ${tempUserData.phone}\nتاريخ الميلاد: ${tempUserData.dob}`);
-
-  alert("تم إنشاء الحساب بنجاح!");
-  closeModal('authModal');
-  
-  currentUser = {name: tempUserData.name, email: tempUserData.email, phone: tempUserData.phone, coins: 0, admin: false};
-  localStorage.setItem("pcuser", JSON.stringify(currentUser));
-  updateUserBar();
-}
-
-function login(){
-  const email=document.getElementById("loginEmail").value.trim().toLowerCase(),pass=document.getElementById("loginPass").value;
-  if(ADMIN_EMAILS.includes(email)){
-    const adminPass=localStorage.getItem("adminPass");
-    if(!adminPass){if(!pass)return authMessage("اكتب كلمة المرور للآدمن وسيتم حفظها.");localStorage.setItem("adminPass",pass);}
-    else if(pass!==adminPass)return authMessage("كلمة مرور المسؤول غير صحيحة.");
-    currentUser={name:"Administrator",email,coins:99999,admin:true};
-  }else{
-    const u=users.find(x=>x.email===email&&x.pass===pass);
-    if(!u)return authMessage("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
-    currentUser={name:u.name,email:u.email,phone:u.phone||"غير محدد",coins:u.coins||0,admin:false};
-  }
-  localStorage.setItem("pcuser",JSON.stringify(currentUser));closeModal("authModal");updateUserBar();render();
-}
-
-function updateUserBar(){
-  const bar=document.getElementById("userBar");
-  if(!currentUser){
-    bar.innerHTML='<button class="btn" onclick="showAuth(\'login\');openModal(\'authModal\')">تسجيل الدخول</button>';
-    return;
-  }
-  
-  const u = users.find(x => x.email === currentUser.email);
-  if(u) currentUser.coins = u.coins || 0;
-
-  bar.innerHTML=`
-    <span class="coins-badge">🪙 ${currentUser.coins||0} كوينز</span>
-    <button class="btn warning" onclick="openModal('coinsModal')">➕ شراء كوينز</button>
-    <span>👤 ${esc(currentUser.name)}</span>
-    ${currentUser.admin?'<span class="admin">ADMIN</span><button class="btn" onclick="openAdmin()">لوحة التحكم</button>':''}
-    <button class="btn danger" onclick="logout()">خروج</button>
-  `;
-}
-
-function submitCoinOrder(){
-  if(!currentUser) return openModal('authModal');
-  const packageCoins = document.getElementById("coinPackageSelect").value;
-  const payMethod = document.getElementById("coinPayMethod").value;
-
-  const newOrder = {
-    id: Date.now(),
-    type: "coin_charge",
-    userEmail: currentUser.email,
-    details: `شحن ${packageCoins} كوينز (طريقة الدفع: ${payMethod})`,
-    status: "pending",
-    amountCoins: parseInt(packageCoins),
-    date: new Date().toLocaleString()
-  };
-
-  orders.push(newOrder);
-  save();
-
-  sendNotificationToAdmin("طلب شحن كوينز جديد يحتاج موافقتك! 🪙", `رقم الطلب: ${newOrder.id}\nالعميل: ${currentUser.email}\nالتفاصيل: ${newOrder.details}`);
-
-  alert("تم إرسال طلب شحن الكوينز! سيتم إضافة الكوينز فوراً بعد موافقة المسؤول.");
-  closeModal('coinsModal');
-}
-
-let activePayGame=null;
-function openPay(i){
-  if(!currentUser) return openModal('authModal');
-  activePayGame=games[i];
-
-  if (hasUserBoughtGame(activePayGame.name) || checkIfFree(activePayGame.coinPrice, activePayGame.cardPrice)) {
-    window.open(activePayGame.download, '_blank');
-    return;
-  }
-
-  document.getElementById("payModalTitle").textContent = "🛒 شراء لعبة";
-  const cPrice = activePayGame.coinPrice || 0;
-  const cardP = activePayGame.cardPrice || "غير محدد";
-  document.getElementById("payInfo").innerHTML=`<p>اللعبة: <b>${esc(activePayGame.name)}</b></p><p>السعر بالكوينز: <b>🪙 ${cPrice} كوينز</b></p><p>السعر بالبطاقات/المحافظ: <b>💳 ${esc(cardP)}</b></p>`;
-  togglePaymentFields();
-  openModal("payModal");
-}
-
-function confirmPay(){
-  if (!activePayGame || !currentUser) return;
-  const payMethod = document.getElementById("paySelect").value;
-
-  if(payMethod === "coins") {
-    const priceNum = parseInt(activePayGame.coinPrice) || 0;
-    const user = users.find(u => u.email === currentUser.email);
-    const userCoins = user ? (user.coins || 0) : (currentUser.coins || 0);
-
-    if(userCoins < priceNum) {
-      return alert(`عذراً! رصيدك (${userCoins} كوينز) لا يكفي لشراء اللعبة (${priceNum} كوينز).\nيرجى شحن رصيدك بالضغط على "شراء كوينز".`);
-    }
-
-    if(user) {
-      user.coins -= priceNum;
-      if(!user.purchasedGames) user.purchasedGames = [];
-      user.purchasedGames.push(activePayGame.name);
-    }
-    currentUser.coins -= priceNum;
-
-    const logItem = {
-      userEmail: currentUser.email,
-      gameName: activePayGame.name,
-      coinsSpent: priceNum,
-      date: new Date().toLocaleString()
-    };
-    instantLogs.push(logItem);
-
-    save();
-    updateUserBar();
-    render();
-
-    sendNotificationToAdmin(
-      `تم شراء لعبة بالكوينز فورياً: ${activePayGame.name} 🎮`,
-      `العميل: ${currentUser.email}\nاللعبة: ${activePayGame.name}\nعدد الكوينز المخصومة: ${priceNum} كوينز\nتاريخ الشراء: ${logItem.date}`
-    );
-
-    alert(`🎉 تم الخصم والشراء بنجاح بالكوينز بدون انتظار موافقة!\nتم خصم ${priceNum} كوينز. جارٍ فتح رابط التحميل...`);
-    window.open(activePayGame.download, '_blank');
-    closeModal("payModal");
-    return;
-  }
-
-  const newOrder = {
-    id: Date.now(),
-    type: "game_purchase",
-    userEmail: currentUser.email,
-    gameName: activePayGame.name,
-    details: `شراء لعبة ${activePayGame.name} (السعر: ${activePayGame.cardPrice || "غير محدد"}) عبر ${payMethod}`,
-    status: "pending",
-    date: new Date().toLocaleString()
-  };
-
-  orders.push(newOrder);
-  save();
-
-  sendNotificationToAdmin("طلب شراء لعبة جديد بالبطاقة/InstaPay يحتاج موافقتك! 🎮", `رقم الطلب: ${newOrder.id}\nالعميل: ${currentUser.email}\nالتفاصيل: ${newOrder.details}`);
-
-  alert("تم إرسال الطلب بنجاح! سيتم تفعيل إمكانية التحميل لك فور موافقة المسؤول.");
-  closeModal("payModal");
-  render();
-}
-
-function openAdmin(){
-  if(!currentUser?.admin) return;
-
-  const pendingBox = document.getElementById("pendingOrders");
-  const pendingList = orders.filter(o => o.status === "pending");
-
-  if(!pendingList.length) {
-    pendingBox.innerHTML = "لا توجد طلبات معلقة حالياً.";
-  } else {
-    pendingBox.innerHTML = pendingList.map(o => `
-      <div style="background:#111a29;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #34445d">
-        <p><b>نوع الطلب:</b> ${o.type}</p>
-        <p><b>العميل:</b> ${o.userEmail}</p>
-        <p><b>التفاصيل:</b> ${o.details}</p>
-        <div style="display:flex;gap:10px;margin-top:8px">
-          <button class="btn success" onclick="approveOrder(${o.id})">🟢 موافقة وإرسال إشعار</button>
-          <button class="btn danger" onclick="rejectOrder(${o.id})">🔴 رفض</button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  const logBox = document.getElementById("instantLogs");
-  if(!instantLogs.length) {
-    logBox.innerHTML = "لا توجد مشتريات فورية بالكوينز حتى الآن.";
-  } else {
-    logBox.innerHTML = instantLogs.map(l => `
-      <div style="font-size:12px;padding:6px 0;border-bottom:1px solid #233248">
-        🎮 <b>${esc(l.gameName)}</b> | 👤 ${esc(l.userEmail)} | 🪙 <b>${l.coinsSpent} كوينز</b> | 🕒 ${l.date}
-      </div>
-    `).join('');
-  }
-
-  const uBox = document.getElementById("registeredUsers");
-  uBox.innerHTML = users.length ? users.map(u=>`<div>👤 <b>${esc(u.name)}</b> (${esc(u.email)}) | 📞 ${esc(u.phone)} | 🎂 ${esc(u.dob||"غير محدد")} | 🪙 <b>${u.coins||0} كوينز</b></div>`).join('') : "لا يوجد مستخدمين مسجلين بعد.";
-
-  renderAdmin();
-  openModal("adminModal");
-}
-
-function approveOrder(orderId){
-  const o = orders.find(x => x.id === orderId);
-  if(!o) return;
-
-  o.status = "approved";
-
-  if(o.type === "coin_charge") {
-    const user = users.find(u => u.email === o.userEmail);
-    if(user) {
-      user.coins = (user.coins || 0) + o.amountCoins;
-    }
-  } else if(o.type === "game_purchase") {
-    const user = users.find(u => u.email === o.userEmail);
-    if(user) {
-      if(!user.purchasedGames) user.purchasedGames = [];
-      user.purchasedGames.push(o.gameName);
-    }
-  }
-
-  save();
-  updateUserBar();
-  render();
-  openAdmin();
-
-  sendNotificationToAdmin(
-    `تمت الموافقة على طلبك بنجاح! 🎉`,
-    `مرحباً، تم قبول وتفعيل طلبك (${o.details}) بنجاح! يمكنك الآن الدخول للموقع وتحميل اللعبة أو استخدام الكوينز.`
-  );
-
-  alert("🟢 تمت الموافقة! تم إرسال الإشعار وتفعيل الطلب للمستخدم فوراً.");
-}
-
-function rejectOrder(orderId){
-  const o = orders.find(x => x.id === orderId);
-  if(!o) return;
-  o.status = "rejected";
-  save();
-  openAdmin();
-  alert("🔴 تم رفض الطلب.");
-}
-
-function setPlatform(p){currentPlatform=p;document.getElementById("pTabPc").classList.toggle("active", p==='pc');document.getElementById("pTabMobile").classList.toggle("active", p==='mobile');render();}
-function setCat(c,b){category=c;document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");render();}
 function catName(c){return {action:"أكشن",racing:"سباق",adventure:"مغامرات",sports:"رياضة"}[c]||c}
-function checkIfFree(cPrice, cardPrice){
-  if(cPrice === 0) return true;
-  if(cardPrice && (cardPrice.trim() === "مجاني" || cardPrice.trim() === "0" || cardPrice.toLowerCase() === "free")) return true;
-  return false;
-}
-function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function openModal(id){document.getElementById(id).classList.add("show")}
-function closeModal(id){document.getElementById(id).classList.remove("show")}
-function showAuth(type){document.getElementById("loginForm").classList.toggle("hidden",type!=="login");document.getElementById("signupForm").classList.toggle("hidden",type!=="signup");document.getElementById("otpForm").classList.add("hidden");document.getElementById("loginTab").classList.toggle("active",type==="login");document.getElementById("signupTab").classList.toggle("active",type==="signup");document.getElementById("authMsg").textContent="";}
-function authMessage(t){document.getElementById("authMsg").textContent=t}
-function logout(){currentUser=null;localStorage.removeItem("pcuser");updateUserBar();render();closeModal("adminModal")}
 
-function togglePaymentFields(){
-  const method=document.getElementById("paySelect").value;
-  document.getElementById("coinsFields").classList.toggle("hidden",method!=="coins");
-  document.getElementById("instapayFields").classList.toggle("hidden",method!=="instapay");
-  document.getElementById("cardFields").classList.toggle("hidden",method!=="card");
+function setPlatform(p){
+  currentPlatform=p;
+  document.getElementById("pTabPc").classList.toggle("active", p==='pc');
+  document.getElementById("pTabMobile").classList.toggle("active", p==='mobile');
+  render();
 }
 
-function toggleCoinPayFields(){
-  const method=document.getElementById("coinPayMethod").value;
-  document.getElementById("coinInstaFields").classList.toggle("hidden",method!=="instapay");
-  document.getElementById("coinCardFields").classList.toggle("hidden",method!=="card");
-}
-
-function hasUserBoughtGame(gameName) {
-  if(!currentUser) return false;
-  const user = users.find(u => u.email === currentUser.email);
-  if(!user || !user.purchasedGames) return false;
-  return user.purchasedGames.includes(gameName);
+function checkIfFree(priceStr) {
+  if (!priceStr) return true;
+  const p = String(priceStr).trim().toLowerCase();
+  return p === "0" || p === "0$" || p === "مجاني" || p.includes("free") || p === "";
 }
 
 function render(){
@@ -679,74 +311,258 @@ function render(){
   
   list.forEach((g)=>{
     const realIndex=games.indexOf(g);
-    const isFree = checkIfFree(g.coinPrice, g.cardPrice);
-    const isBought = hasUserBoughtGame(g.name);
-    const pendingOrder = currentUser ? orders.find(o => o.userEmail === currentUser.email && o.gameName === g.name && o.status === "pending") : null;
+    const isFree = checkIfFree(g.price);
+    const isPreOrder = g.type === "preorder";
 
-    let actionBtn = `<button class="btn success" onclick="openPay(${realIndex})">شراء / طلب</button>`;
-    
-    if (isFree || isBought) {
-      actionBtn = `<button class="btn success" onclick="openPay(${realIndex})">📥 تحميل اللعبة</button>`;
-    } else if (pendingOrder) {
-      actionBtn = `<button class="btn warning" style="font-size:12px" onclick="alert('طلبك قيد المراجعة من الأدمن!')">⏳ قيد المراجعة</button>`;
+    let btnText = "شراء/تحميل";
+    let btnClass = "btn success";
+
+    if (isPreOrder) {
+      btnText = isFree ? "حجز مسبق مجاني" : "طلب مسبق (Pre-Order)";
+      btnClass = "btn warning";
+    } else if (isFree) {
+      btnText = "تحميل مجاني";
+      btnClass = "btn";
     }
-
-    const coinText = (g.coinPrice === 0 || !g.coinPrice) ? "مجاني" : `${g.coinPrice} كوينز`;
-    const cardText = g.cardPrice || "مجاني";
 
     grid.innerHTML+=`
       <article class="card">
         <div class="info">
+          ${isPreOrder ? '<span class="badge preorder">PRE-ORDER</span>' : ''}
           <h3>${esc(g.name)}</h3>
           <p>${esc(g.desc)}</p>
-          <div class="price">
-            <span class="coin-p">🪙 ${esc(coinText)}</span>
-            <span class="card-p">💳 ${esc(cardText)}</span>
-          </div>
+          <div class="price">${esc(g.price||"مجاني")}</div>
           <div class="meta"><span>${catName(g.category)}</span><span>⭐ ${g.rating||0}/5</span></div>
           <div class="actions">
             <button class="btn secondary" onclick="details(${realIndex})">التفاصيل</button>
-            ${actionBtn}
+            <button class="${btnClass}" onclick="handleAction(${realIndex})">${btnText}</button>
           </div>
         </div>
       </article>`;
   });
 }
 
+function handleAction(i) {
+  const g = games[i];
+  const isFree = checkIfFree(g.price);
+  const isPreOrder = g.type === "preorder";
+
+  if (isFree) {
+    if (isPreOrder) {
+      alert(`تم تسجيل طلبك المسبق بنجاح للعبة: ${g.name}!\nسنقوم بإخطارك فور صدورها.`);
+    } else {
+      if (g.download) {
+        window.open(g.download, "_blank");
+      } else {
+        alert("لم يتم إضافة رابط تحميل لهذه اللعبة بعد.");
+      }
+    }
+  } else {
+    openPay(i);
+  }
+}
+
+function setCat(c,b){category=c;document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+function openModal(id){document.getElementById(id).classList.add("show")}
+function closeModal(id){document.getElementById(id).classList.remove("show")}
+
+function showAuth(type){
+  document.getElementById("loginForm").classList.toggle("hidden",type!=="login");
+  document.getElementById("signupForm").classList.toggle("hidden",type!=="signup");
+  document.getElementById("otpForm").classList.add("hidden");
+  document.getElementById("loginTab").classList.toggle("active",type==="login");
+  document.getElementById("signupTab").classList.toggle("active",type==="signup");
+  document.getElementById("authMsg").textContent="";
+}
+function authMessage(t){document.getElementById("authMsg").textContent=t}
+
+function sendOTP(){
+  const name=document.getElementById("signupName").value.trim();
+  const phone=document.getElementById("signupPhone").value.trim();
+  const email=document.getElementById("signupEmail").value.trim().toLowerCase();
+  const pass=document.getElementById("signupPass").value;
+
+  if(!name||!phone||!email||!pass) return authMessage("يرجى ملء جميع البيانات.");
+  if(users.some(u=>u.email===email)) return authMessage("هذا البريد الإلكتروني مسجل بالفعل.");
+
+  generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+  tempUserData = {name, phone, email, pass, date: new Date().toLocaleString()};
+
+  document.getElementById("signupForm").classList.add("hidden");
+  document.getElementById("otpForm").classList.remove("hidden");
+
+  alert(`[كود التحقيق التجريبي]\nتم إرسال كود التحقيق إلى بريدك (${email}):\nالكود هو: ${generatedOTP}`);
+}
+
+function verifyOTP(){
+  const inputOTP = document.getElementById("otpInput").value.trim();
+  if(!inputOTP || inputOTP !== generatedOTP) {
+    return alert("كود التحقيق غير صحيح! حاول مرة أخرى.");
+  }
+
+  users.push(tempUserData);
+  save();
+
+  sendNotificationToAdmin("حساب جديد مسجل ومؤكد", `الاسم: ${tempUserData.name}\nالهاتف: ${tempUserData.phone}\nالبريد: ${tempUserData.email}`);
+
+  alert("تم تأكيد البريد الإلكتروني وإنشاء حسابك بنجاح!");
+  closeModal('authModal');
+  
+  currentUser = {name: tempUserData.name, email: tempUserData.email, phone: tempUserData.phone, admin: false};
+  localStorage.setItem("pcuser", JSON.stringify(currentUser));
+  updateUserBar();
+}
+
+function login(){
+  const email=document.getElementById("loginEmail").value.trim().toLowerCase(),pass=document.getElementById("loginPass").value;
+  if(ADMIN_EMAILS.includes(email)){
+    const adminPass=localStorage.getItem("adminPass");
+    if(!adminPass){if(!pass)return authMessage("اكتب كلمة المرور للآدمن وسيتم حفظها.");localStorage.setItem("adminPass",pass);}
+    else if(pass!==adminPass)return authMessage("كلمة مرور المسؤول غير صحيحة.");
+    currentUser={name:"Administrator",email,admin:true};
+  }else{
+    const u=users.find(x=>x.email===email&&x.pass===pass);
+    if(!u)return authMessage("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+    currentUser={name:u.name,email:u.email,phone:u.phone||"غير محدد",admin:false};
+  }
+  localStorage.setItem("pcuser",JSON.stringify(currentUser));closeModal("authModal");updateUserBar();
+}
+
+function logout(){currentUser=null;localStorage.removeItem("pcuser");updateUserBar();closeModal("adminModal")}
+
+function updateUserBar(){
+  const bar=document.getElementById("userBar");
+  if(!currentUser){
+    bar.innerHTML='<button class="btn" onclick="showAuth(\'login\');openModal(\'authModal\')">تسجيل الدخول</button>';
+    return;
+  }
+  bar.innerHTML=`
+    <span>👤 ${esc(currentUser.name)}</span>
+    <button class="btn success" onclick="openProfileSettings()">⚙️️ إعدادات الحساب</button>
+    ${currentUser.admin?'<span class="admin">ADMIN</span><button class="btn" onclick="openAdmin()">لوحة التحكم</button>':''}
+    <button class="btn danger" onclick="logout()">خروج</button>
+  `;
+}
+
+function openProfileSettings(){
+  if(!currentUser) return openModal("authModal");
+  document.getElementById("setProfileName").value = currentUser.name || "";
+  document.getElementById("setProfilePhone").value = currentUser.phone || "";
+  openModal("settingsModal");
+}
+
+function saveProfileSettings(){
+  const newName = document.getElementById("setProfileName").value.trim();
+  const newPhone = document.getElementById("setProfilePhone").value.trim();
+
+  if(!newName || !newPhone) return alert("يرجى عدم ترك الحقول فارغة.");
+
+  const userObj = users.find(u => u.email === currentUser.email);
+  if(userObj) {
+    userObj.name = newName;
+    userObj.phone = newPhone;
+  }
+
+  currentUser.name = newName;
+  currentUser.phone = newPhone;
+
+  save();
+  localStorage.setItem("pcuser", JSON.stringify(currentUser));
+  updateUserBar();
+  closeModal("settingsModal");
+  alert("تم تعديل الاسم ورقم الهاتف بنجاح!");
+}
+
 function details(i){
   const g=games[i];
-  const coinText = (g.coinPrice === 0 || !g.coinPrice) ? "مجاني" : `${g.coinPrice} كوينز`;
-  const cardText = g.cardPrice || "مجاني";
-  
+  const isFree = checkIfFree(g.price);
+  const isPreOrder = g.type === "preorder";
+
+  let btnText = isPreOrder ? (isFree ? "حجز مسبق مجاني" : "طلب مسبق (Pre-Order)") : (isFree ? "⬇ تحميل مجاني" : "🛒 إتمام الشراء");
+
   document.getElementById("details").innerHTML=`
-    <h2>${esc(g.name)}</h2>
+    <h2>${esc(g.name)} (${g.platform.toUpperCase()})</h2>
     <p>${esc(g.desc)}</p>
-    <p>سعر الكوينز: <b>🪙 ${esc(coinText)}</b><br>سعر البطاقات/المحافظ: <b>💳 ${esc(cardText)}</b><br>الحجم: ${esc(g.size)}</p>
-    <button class="btn success" style="width:100%" onclick="closeModal('detailsModal');openPay(${i})">شراء / تحميل</button>`;
+    <p>التصنيف: ${catName(g.category)}<br>الحالة: <b>${isPreOrder ? "طلب مسبق (Pre-Order)" : "متوفر الآن"}</b><br>السعر: <b>${esc(g.price||"مجاني")}</b><br>الحجم: ${esc(g.size)}<br>التقييم: ⭐ ${g.rating||0}/5</p>
+    <button class="btn success" style="width:100%" onclick="closeModal('detailsModal');handleAction(${i})">${btnText}</button>`;
   openModal("detailsModal");
+}
+
+let activePayGame=null;
+function openPay(i){
+  activePayGame=games[i];
+  const isPreOrder = activePayGame.type === "preorder";
+  document.getElementById("payModalTitle").textContent = isPreOrder ? "🛍️ إتمام الطلب المسبق (Pre-Order)" : "🛒 إتمام عملية الشراء";
+  document.getElementById("payInfo").innerHTML=`<p>اللعبة: <b>${esc(activePayGame.name)}</b></p><p>السعر المطلوب: <b>${esc(activePayGame.price||"مجاني")}</b></p>`;
+  togglePaymentFields();
+  openModal("payModal");
+}
+
+function togglePaymentFields() {
+  const method = document.getElementById("paySelect").value;
+  document.getElementById("instapayFields").classList.toggle("hidden", method !== "instapay");
+  document.getElementById("cardFields").classList.toggle("hidden", method !== "card");
+  document.getElementById("walletFields").classList.toggle("hidden", method !== "wallet");
+}
+
+function confirmPay(){
+  if (!activePayGame) return;
+
+  const purchaseRecord = {
+    user: currentUser ? currentUser.email : "زائر غير مسجل",
+    game: activePayGame.name,
+    price: activePayGame.price,
+    date: new Date().toLocaleString()
+  };
+
+  purchases.push(purchaseRecord);
+  save();
+
+  sendNotificationToAdmin("عملية شراء جديدة!", `تم شراء اللعبة: ${activePayGame.name}\nالسعر: ${activePayGame.price}\nبواسطة: ${purchaseRecord.user}`);
+
+  alert(`تم تسجيل العملية بنجاح للعبة: ${activePayGame.name}\nوإرسال البيانات إلى aw334948@gmail.com`);
+  closeModal("payModal");
+  if (activePayGame.download) window.open(activePayGame.download, "_blank");
+}
+
+function sendNotificationToAdmin(subject, text) {
+  console.log(`[إشعار للمسؤول aw334948@gmail.com]\nالموضوع: ${subject}\nبيانات العملية:\n${text}`);
+}
+
+function openAdmin(){
+  if(!currentUser?.admin) return;
+
+  const uBox = document.getElementById("registeredUsers");
+  uBox.innerHTML = users.length ? users.map(u=>`<div>👤 <b>${esc(u.name)}</b> (${esc(u.email)}) - 📞 ${esc(u.phone||"غير محدد")}</div>`).join('') : "لا يوجد مستخدمين مسجلين بعد.";
+
+  const pBox = document.getElementById("purchaseHistory");
+  pBox.innerHTML = purchases.length ? purchases.map(p=>`<div>🛍️ <b>${esc(p.game)}</b> - ${esc(p.price)} | العميل: ${esc(p.user)} | ${p.date}</div>`).join('') : "لا توجد مشتريات مسجلة بعد.";
+
+  renderAdmin();
+  openModal("adminModal");
 }
 
 function addGame(){
   const name=document.getElementById("gName").value.trim(),
         platform=document.getElementById("gPlatform").value,
         cat=document.getElementById("gCat").value,
-        coinPriceInput=document.getElementById("gCoinPrice").value,
-        cardPriceInput=document.getElementById("gCardPrice").value.trim(),
+        type=document.getElementById("gType").value,
+        price=document.getElementById("gPrice").value.trim(),
         download=document.getElementById("gDownload").value.trim(),
         size=document.getElementById("gSize").value.trim(),
         rating=Number(document.getElementById("gRating").value)||0,
         desc=document.getElementById("gDesc").value.trim();
 
-  if(!name) return alert("يرجى كتابة اسم اللعبة.");
-
-  const coinPrice = Math.min(100000, Math.max(0, parseInt(coinPriceInput) || 0));
+  if(!name)return alert("يرجى كتابة اسم اللعبة على الأقل.");
 
   games.push({
     name,
     platform,
     category:cat,
-    coinPrice: coinPrice,
-    cardPrice: cardPriceInput || "مجاني",
+    type:type||"normal",
+    price:price||"مجاني",
     download,
     size:size||"غير محدد",
     rating:Math.min(5,rating),
@@ -756,14 +572,13 @@ function addGame(){
   save();
   render();
   renderAdmin();
-  alert("تمت إضافة اللعبة بنجاح بالسعرين المحددين.");
+  alert("تمت إضافة اللعبة وتعيين السعر والإتاحة بنجاح.");
 }
 
 function renderAdmin(){
   const box=document.getElementById("adminGames");box.innerHTML="";
   games.forEach((g,i)=>{
-    const cP = (g.coinPrice === 0 || !g.coinPrice) ? "مجاني" : `${g.coinPrice} كوينز`;
-    box.innerHTML+=`<div style="background:#0b1320;border:1px solid #27364d;padding:12px;border-radius:8px;margin:8px 0;display:flex;justify-content:space-between"><span>[${g.platform.toUpperCase()}] ${esc(g.name)} - 🪙 ${cP} | 💳 ${esc(g.cardPrice||"مجاني")}</span><button class="btn danger" onclick="deleteGame(${i})">حذف</button></div>`;
+    box.innerHTML+=`<div style="background:#0b1320;border:1px solid #27364d;padding:12px;border-radius:8px;margin:8px 0;display:flex;justify-content:space-between;gap:8px;align-items:center"><span>[${g.platform.toUpperCase()}] ${esc(g.name)} (${g.type==='preorder'?'Pre-Order':'عادي'}) - ${esc(g.price)}</span><button class="btn danger" onclick="deleteGame(${i})">حذف</button></div>`;
   });
 }
 
